@@ -273,7 +273,7 @@ button{width:100%}
 <span>Built by <strong>Nikhil</strong></span>
 <a href="https://imnick009.github.io" target="_blank">Portfolio</a>
 <a href="https://github.com/imnick009" target="_blank">GitHub</a>
-<a href="#" onclick="copyEmail(event)">Contact (Copy Email)</a>
+<a href="#" onclick="copyEmail(event)">osmnick999@gmail.com</a>
 </footer>
 </div>
 </div>
@@ -504,6 +504,7 @@ display:flex;
 gap:16px;
 justify-content:center;
 flex-wrap:wrap;
+align-items:center;
 }
 .cta-links a{
 color:var(--accent);
@@ -514,6 +515,22 @@ cursor:pointer;
 }
 .cta-links a:hover{
 color:var(--accent2);
+}
+.cta-links a.email-btn{
+display:inline-block;
+padding:14px 32px;
+border-radius:12px;
+background:var(--gradient);
+color:#0a0e27;
+font-weight:700;
+font-size:1rem;
+box-shadow:0 4px 16px rgba(74,222,128,.25);
+transition:all .3s;
+}
+.cta-links a.email-btn:hover{
+transform:translateY(-2px);
+box-shadow:0 8px 24px rgba(74,222,128,.4);
+color:#0a0e27;
 }
 .toast{
 position:fixed;
@@ -586,6 +603,7 @@ def audit(url):
                        "Add alt text to every image (SEO + accessibility).",
                        "🖼️"))
         kb = round(len(r.content) / 1024)
+        kb = round(len(r.content) / 1024)
         checks.append(("Page Weight", kb <= 1500, f"{kb} KB",
                        "Compress images & remove unused scripts.",
                        "📦"))
@@ -639,7 +657,7 @@ def report_html(u, checks):
   <h2>Want these issues fixed for you?</h2>
   <p>I fix exactly these problems for businesses in 2-4 days, fixed price. No surprises.</p>
   <div class="cta-links">
-    <a href="#" onclick="copyEmail(event)">📧 Copy Email</a>
+    <a href="#" class="email-btn" onclick="copyEmail(event)">osmnick999@gmail.com</a>
     <a href="https://imnick009.github.io" target="_blank">🌐 Portfolio</a>
     <a href="https://github.com/imnick009" target="_blank">🐙 GitHub</a>
   </div>
