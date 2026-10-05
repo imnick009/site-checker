@@ -197,14 +197,34 @@ font-size:.9rem;
 display:flex;
 gap:20px;
 flex-wrap:wrap;
+align-items:center;
 }
 footer a{
 color:var(--accent);
 text-decoration:none;
 transition:color .2s;
+cursor:pointer;
 }
 footer a:hover{
 color:var(--accent2);
+}
+.toast{
+position:fixed;
+bottom:30px;
+left:50%;
+transform:translateX(-50%) translateY(100px);
+background:var(--gradient);
+color:#0a0e27;
+padding:14px 28px;
+border-radius:12px;
+font-weight:700;
+font-size:.95rem;
+box-shadow:0 8px 32px rgba(74,222,128,.4);
+transition:transform .3s ease;
+z-index:9999;
+}
+.toast.show{
+transform:translateX(-50%) translateY(0);
 }
 @media(max-width:640px){
 .box{padding:32px 24px}
@@ -251,14 +271,26 @@ button{width:100%}
 
 <footer>
 <span>Built by <strong>Nikhil</strong></span>
-<a href="https://imnick009.github.io">Portfolio</a>
-<a href="https://github.com/imnick009">GitHub</a>
-<a href="mailto:osmnick999@gmail.com">Contact</a>
+<a href="https://imnick009.github.io" target="_blank">Portfolio</a>
+<a href="https://github.com/imnick009" target="_blank">GitHub</a>
+<a href="#" onclick="copyEmail(event)">Contact (Copy Email)</a>
 </footer>
 </div>
 </div>
 
+<div class="toast" id="toast">✓ Email copied to clipboard!</div>
+
 <script>
+function copyEmail(e) {
+  e.preventDefault();
+  const email = 'osmnick999@gmail.com';
+  navigator.clipboard.writeText(email).then(() => {
+    const toast = document.getElementById('toast');
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2500);
+  });
+}
+
 document.getElementById('checkForm').addEventListener('submit', function(e) {
   const btn = document.getElementById('submitBtn');
   const input = document.getElementById('urlInput');
@@ -478,9 +510,28 @@ color:var(--accent);
 text-decoration:none;
 font-weight:600;
 transition:color .2s;
+cursor:pointer;
 }
 .cta-links a:hover{
 color:var(--accent2);
+}
+.toast{
+position:fixed;
+bottom:30px;
+left:50%;
+transform:translateX(-50%) translateY(100px);
+background:var(--gradient);
+color:#0a0e27;
+padding:14px 28px;
+border-radius:12px;
+font-weight:700;
+font-size:.95rem;
+box-shadow:0 8px 32px rgba(74,222,128,.4);
+transition:transform .3s ease;
+z-index:9999;
+}
+.toast.show{
+transform:translateX(-50%) translateY(0);
 }
 @keyframes spin{
 to{transform:rotate(360deg)}
@@ -588,11 +639,25 @@ def report_html(u, checks):
   <h2>Want these issues fixed for you?</h2>
   <p>I fix exactly these problems for businesses in 2-4 days, fixed price. No surprises.</p>
   <div class="cta-links">
-    <a href="mailto:osmnick999@gmail.com">📧 Email Me</a>
+    <a href="#" onclick="copyEmail(event)">📧 Copy Email</a>
     <a href="https://imnick009.github.io" target="_blank">🌐 Portfolio</a>
     <a href="https://github.com/imnick009" target="_blank">🐙 GitHub</a>
   </div>
 </div>
+
+<div class="toast" id="toast">✓ Email copied to clipboard!</div>
+
+<script>
+function copyEmail(e) {{
+  e.preventDefault();
+  const email = 'osmnick999@gmail.com';
+  navigator.clipboard.writeText(email).then(() => {{
+    const toast = document.getElementById('toast');
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2500);
+  }});
+}}
+</script>
 
 </div></body></html>"""
 
