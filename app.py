@@ -1,13 +1,16 @@
-from flask import Flask, request
+from flask import Flask, request, send_file
 import requests as req
 import time
+import io
+import urllib.parse
 from bs4 import BeautifulSoup
+from fpdf import FPDF
 
 app = Flask(__name__)
 
 UA = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
 
-LANDING = """<!DOCTYPE html>
+LANDING="""<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -240,12 +243,10 @@ button{width:100%}
 <div class="logo">🩺 Free Tool</div>
 <h1>Website Health <span>Check</span></h1>
 <p class="sub">Get an instant professional audit of any website — speed, mobile, SEO & security issues revealed in seconds.</p>
-
 <form action="/api/check" method="POST" id="checkForm">
 <input type="text" name="url" placeholder="https://yourbusiness.com" required id="urlInput">
 <button type="submit" id="submitBtn">Scan Website</button>
 </form>
-
 <div class="features">
 <div class="feature">
 <div class="feature-icon">⚡</div>
@@ -268,7 +269,6 @@ button{width:100%}
 <div class="feature-desc">Title, meta tags, headings check</div>
 </div>
 </div>
-
 <footer>
 <span>Built by <strong>Nikhil</strong></span>
 <a href="https://imnick009.github.io" target="_blank">Portfolio</a>
@@ -277,36 +277,33 @@ button{width:100%}
 </footer>
 </div>
 </div>
-
 <div class="toast" id="toast">✓ Email copied to clipboard!</div>
-
 <script>
 function copyEmail(e) {
-  e.preventDefault();
-  const email = 'osmnick999@gmail.com';
-  navigator.clipboard.writeText(email).then(() => {
-    const toast = document.getElementById('toast');
-    toast.classList.add('show');
-    setTimeout(() => toast.classList.remove('show'), 2500);
-  });
+e.preventDefault();
+const email = 'osmnick999@gmail.com';
+navigator.clipboard.writeText(email).then(() => {
+const toast = document.getElementById('toast');
+toast.classList.add('show');
+setTimeout(() => toast.classList.remove('show'), 2500);
+});
 }
-
 document.getElementById('checkForm').addEventListener('submit', function(e) {
-  const btn = document.getElementById('submitBtn');
-  const input = document.getElementById('urlInput');
-  if (!input.value.trim()) {
-    e.preventDefault();
-    return;
-  }
-  btn.innerHTML = '<span style="display:inline-block;animation:spin 1s linear infinite;">⏳</span> Scanning...';
-  btn.disabled = true;
-  btn.style.opacity = '.7';
+const btn = document.getElementById('submitBtn');
+const input = document.getElementById('urlInput');
+if (!input.value.trim()) {
+e.preventDefault();
+return;
+}
+btn.innerHTML = '<span style="display:inline-block;animation:spin 1s linear infinite;">⏳</span> Scanning...';
+btn.disabled = true;
+btn.style.opacity = '.7';
 });
 </script>
 </body>
 </html>"""
 
-CSS = """
+CSS="""
 *{margin:0;padding:0;box-sizing:border-box}
 :root{
 --bg:#0a0e27;
@@ -567,7 +564,6 @@ def audit(url):
         load = round(time.time() - t0, 2)
         final_url = r.url
         soup = BeautifulSoup(r.text, "html.parser")
-
         checks.append(("Page Load Speed", load <= 3, f"{load}s",
                        "Compress images, enable caching, use a CDN.",
                        "⚡"))
@@ -603,7 +599,6 @@ def audit(url):
                        "Add alt text to every image (SEO + accessibility).",
                        "🖼️"))
         kb = round(len(r.content) / 1024)
-        kb = round(len(r.content) / 1024)
         checks.append(("Page Weight", kb <= 1500, f"{kb} KB",
                        "Compress images & remove unused scripts.",
                        "📦"))
@@ -614,23 +609,25 @@ def audit(url):
 def report_html(u, checks):
     passed = sum(1 for c in checks if c[1])
     score = round(passed / len(checks) * 100)
-    
     rows = ""
     for i, (name, ok, detail, fix, icon) in enumerate(checks):
         status_class = "" if ok else "row-fail"
         status_icon = "✅" if ok else "❌"
         fix_html = f'<div class="row-fix">🔧 <strong>Fix:</strong> {fix}</div>' if not ok else ""
         rows += f"""
-        <div class="row {status_class}" style="animation-delay:{.15 + i*.05}s">
-          <div class="row-header">
-            <div class="row-icon">{icon}</div>
-            <div class="row-content">
-              <div class="row-name">{status_icon} {name}</div>
-              <div class="row-detail">{detail}</div>
-              {fix_html}
-            </div>
-          </div>
-        </div>"""
+<div class="row {status_class}" style="animation-delay:{.15+i*.05}s">
+<div class="row-header">
+<div class="row-icon">{icon}</div>
+<div class="row-content">
+<div class="row-name">{status_icon}{name}</div>
+<div class="row-detail">{detail}</div>
+{fix_html}
+</div>
+</div>
+</div>"""
+    
+    # Added for PDF URL safety
+    safe_u = urllib.parse.quote(u)
     
     return f"""<!DOCTYPE html>
 <html><head><meta charset="UTF-8">
@@ -641,42 +638,37 @@ def report_html(u, checks):
 <a class="back" href="/">← Scan another website</a>
 <h1>🩺 Site<span>Check</span> Report</h1>
 <div class="url-display">Scanned: {u}</div>
-
 <div class="score-card">
-  <div class="score-number">{score}</div>
-  <div class="score-label">Health Score</div>
-  <div class="progress-bar">
-    <div class="progress-fill" style="width:{score}%"></div>
-  </div>
+<div class="score-number">{score}</div>
+<div class="score-label">Health Score</div>
+<div class="progress-bar">
+<div class="progress-fill" style="width:{score}%"></div>
 </div>
-
+</div>
 <div class="section-title">📊 Detailed Analysis</div>
 {rows}
-
 <div class="cta">
-  <h2>Want these issues fixed for you?</h2>
-  <p>I fix exactly these problems for businesses in 2-4 days, fixed price. No surprises.</p>
-  <div class="cta-links">
-    <a href="#" class="email-btn" onclick="copyEmail(event)">osmnick999@gmail.com</a>
-    <a href="https://imnick009.github.io" target="_blank">🌐 Portfolio</a>
-    <a href="https://github.com/imnick009" target="_blank">🐙 GitHub</a>
-  </div>
+<h2>Want these issues fixed for you?</h2>
+<p>I fix exactly these problems for businesses in 2-4 days, fixed price. No surprises.</p>
+<div class="cta-links">
+<a href="/download-pdf?site={safe_u}" target="_blank" class="email-btn" style="background: linear-gradient(135deg, #60a5fa 0%, #4ade80 100%);">📥 Download PDF Report</a>
+<a href="#" class="email-btn" onclick="copyEmail(event)">osmnick999@gmail.com</a>
+<a href="https://imnick009.github.io" target="_blank">🌐 Portfolio</a>
+<a href="https://github.com/imnick009" target="_blank">🐙 GitHub</a>
 </div>
-
+</div>
 <div class="toast" id="toast">✓ Email copied to clipboard!</div>
-
 <script>
 function copyEmail(e) {{
-  e.preventDefault();
-  const email = 'osmnick999@gmail.com';
-  navigator.clipboard.writeText(email).then(() => {{
-    const toast = document.getElementById('toast');
-    toast.classList.add('show');
-    setTimeout(() => toast.classList.remove('show'), 2500);
-  }});
+e.preventDefault();
+const email = 'osmnick999@gmail.com';
+navigator.clipboard.writeText(email).then(() => {{
+const toast = document.getElementById('toast');
+toast.classList.add('show');
+setTimeout(() => toast.classList.remove('show'), 2500);
+}});
 }}
 </script>
-
 </div></body></html>"""
 
 def error_html(msg):
@@ -689,14 +681,14 @@ def error_html(msg):
 <a class="back" href="/">← Try again</a>
 <h1>🩺 Site<span>Check</span></h1>
 <div class="row row-fail">
-  <div class="row-header">
-    <div class="row-icon">❌</div>
-    <div class="row-content">
-      <div class="row-name">Could not scan this website</div>
-      <div class="row-detail">{msg}</div>
-      <div class="row-fix">Please check the URL and try again. Make sure the website is publicly accessible.</div>
-    </div>
-  </div>
+<div class="row-header">
+<div class="row-icon">❌</div>
+<div class="row-content">
+<div class="row-name">Could not scan this website</div>
+<div class="row-detail">{msg}</div>
+<div class="row-fix">Please check the URL and try again. Make sure the website is publicly accessible.</div>
+</div>
+</div>
 </div>
 </div></body></html>"""
 
@@ -714,6 +706,96 @@ def check():
     if err:
         return error_html(err)
     return report_html(u, checks)
+
+@app.route("/download-pdf")
+def download_pdf():
+    url = request.args.get("site", "").strip()
+    if not url:
+        return "No URL provided", 400
+        
+    u = url if url.startswith("http") else "https://" + url
+    checks, err = audit(u)
+    
+    if err:
+        return f"Error scanning site: {err}", 500
+        
+    passed = sum(1 for c in checks if c[1])
+    score = round(passed / len(checks) * 100) if checks else 0
+
+    pdf = FPDF()
+    pdf.add_page()
+    
+    # Header
+    pdf.set_font("Helvetica", "B", 24)
+    pdf.set_text_color(74, 222, 128) # Green from gradient
+    pdf.cell(0, 15, "SiteCheck Health Report", ln=True, align='C')
+    
+    pdf.set_font("Helvetica", "", 12)
+    pdf.set_text_color(100, 100, 100)
+    pdf.cell(0, 10, f"Generated for: {u}", ln=True, align='C')
+    pdf.ln(10)
+
+    # Score
+    pdf.set_font("Helvetica", "B", 18)
+    if score >= 70:
+        pdf.set_text_color(74, 222, 128) # Green
+    elif score >= 40:
+        pdf.set_text_color(251, 191, 36) # Yellow
+    else:
+        pdf.set_text_color(248, 113, 113) # Red
+        
+    pdf.cell(0, 15, f"Overall Health Score: {score}/100", ln=True, align='C')
+    pdf.ln(10)
+    pdf.set_text_color(0, 0, 0)
+
+    # Details
+    pdf.set_font("Helvetica", "B", 14)
+    pdf.cell(0, 10, "Detailed Analysis & Fixes", ln=True)
+    pdf.ln(2)
+
+    for name, ok, detail, fix, icon in checks:
+        pdf.set_font("Helvetica", "B", 12)
+        status = "PASS" if ok else "FAIL"
+        color = (74, 222, 128) if ok else (248, 113, 113)
+        pdf.set_text_color(*color)
+        pdf.cell(20, 8, f"[{status}]", ln=False)
+        
+        pdf.set_text_color(0, 0, 0)
+        pdf.cell(0, 8, f"{name}", ln=True)
+        
+        pdf.set_font("Helvetica", "", 10)
+        pdf.set_text_color(80, 80, 80)
+        pdf.multi_cell(0, 6, f"Status: {detail}")
+        
+        if not ok:
+            pdf.set_text_color(50, 50, 200)
+            pdf.multi_cell(0, 6, f"Fix: {fix}")
+        pdf.ln(4)
+
+    # Footer CTA
+    pdf.ln(10)
+    pdf.set_font("Helvetica", "B", 14)
+    pdf.set_text_color(0, 0, 0)
+    pdf.cell(0, 10, "Want these issues fixed?", ln=True)
+    pdf.set_font("Helvetica", "", 12)
+    pdf.cell(0, 8, "Contact Nikhil to fix these problems for your business.", ln=True)
+    pdf.set_text_color(74, 222, 128)
+    pdf.set_font("Helvetica", "B", 12)
+    pdf.cell(0, 8, "Email: osmnick999@gmail.com", ln=True)
+
+    pdf_bytes = pdf.output()
+    
+    # Safe filename
+    safe_filename = u.replace("https://", "").replace("http://", "").replace("/", "_").replace(":", "")
+    if not safe_filename:
+        safe_filename = "website"
+        
+    return send_file(
+        io.BytesIO(pdf_bytes),
+        mimetype='application/pdf',
+        as_attachment=True,
+        download_name=f'SiteCheck_{safe_filename}.pdf'
+    )
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8080)
