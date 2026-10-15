@@ -708,93 +708,116 @@ def check():
     return report_html(u, checks)
 
 @app.route("/download-pdf")
+def _pdf_text(value):
+    text = str(value)
+    fancy = {
+        "\u2013": "-", "\u2014": "-", "\u2015": "-",
+        "\u2018": "'", "\u2019": "'",
+        "\u201c": '"', "\u201d": '"',
+        "\u2026": "...", "\u00a0": " ", "\u20b9": "Rs ",
+    }
+    for old, new in fancy.items():
+        text = text.replace(old, new)
+    return text.encode("latin-1", "replace").decode("latin-1")
+
+@app.route("/download-pdf")
 def download_pdf():
     url = request.args.get("site", "").strip()
     if not url:
         return "No URL provided", 400
-        
+
     u = url if url.startswith("http") else "https://" + url
     checks, err = audit(u)
-    
     if err:
         return f"Error scanning site: {err}", 500
-        
+
     passed = sum(1 for c in checks if c[1])
     score = round(passed / len(checks) * 100) if checks else 0
 
-    pdf = FPDF()
-    pdf.add_page()
-    
-    # Header
-    pdf.set_font("Helvetica", "B", 24)
-    pdf.set_text_color(74, 222, 128) # Green from gradient
-    pdf.cell(0, 15, "SiteCheck Health Report", ln=True, align='C')
-    
-    pdf.set_font("Helvetica", "", 12)
-    pdf.set_text_color(100, 100, 100)
-    pdf.cell(0, 10, f"Generated for: {u}", ln=True, align='C')
-    pdf.ln(10)
+    try:
+        pdf = FPDF()
+        pdf.add_page()
+        pdf.set_auto_page_break(auto=True, margin=15)
 
-    # Score
-    pdf.set_font("Helvetica", "B", 18)
-    if score >= 70:
-        pdf.set_text_color(74, 222, 128) # Green
-    elif score >= 40:
-        pdf.set_text_color(251, 191, 36) # Yellow
-    else:
-        pdf.set_text_color(248, 113, 113) # Red
-        
-    pdf.cell(0, 15, f"Overall Health Score: {score}/100", ln=True, align='C')
-    pdf.ln(10)
-    pdf.set_text_color(0, 0, 0)
+        # Header
+        pdf.set_font("Helvetica", "B", 22)
+        pdf.set_text_color(20, 120, 80)
+        pdf.cell(0, 12, "SiteCheck Health Report", align="C")
+        pdf.ln(12)
 
-    # Details
-    pdf.set_font("Helvetica", "B", 14)
-    pdf.cell(0, 10, "Detailed Analysis & Fixes", ln=True)
-    pdf.ln(2)
-
-    for name, ok, detail, fix, icon in checks:
-        pdf.set_font("Helvetica", "B", 12)
-        status = "PASS" if ok else "FAIL"
-        color = (74, 222, 128) if ok else (248, 113, 113)
-        pdf.set_text_color(*color)
-        pdf.cell(20, 8, f"[{status}]", ln=False)
-        
-        pdf.set_text_color(0, 0, 0)
-        pdf.cell(0, 8, f"{name}", ln=True)
-        
-        pdf.set_font("Helvetica", "", 10)
-        pdf.set_text_color(80, 80, 80)
-        pdf.multi_cell(0, 6, f"Status: {detail}")
-        
-        if not ok:
-            pdf.set_text_color(50, 50, 200)
-            pdf.multi_cell(0, 6, f"Fix: {fix}")
+        pdf.set_font("Helvetica", "", 11)
+        pdf.set_text_color(110, 110, 110)
+        pdf.cell(0, 8, _pdf_text("Generated for: " + u), align="C")
+        pdf.ln(8)
         pdf.ln(4)
 
-    # Footer CTA
-    pdf.ln(10)
-    pdf.set_font("Helvetica", "B", 14)
-    pdf.set_text_color(0, 0, 0)
-    pdf.cell(0, 10, "Want these issues fixed?", ln=True)
-    pdf.set_font("Helvetica", "", 12)
-    pdf.cell(0, 8, "Contact Nikhil to fix these problems for your business.", ln=True)
-    pdf.set_text_color(74, 222, 128)
-    pdf.set_font("Helvetica", "B", 12)
-    pdf.cell(0, 8, "Email: osmnick999@gmail.com", ln=True)
+        # Score
+        if score >= 70:
+            color = (20, 130, 80)
+        elif score >= 40:
+            color = (190, 130, 20)
+        else:
+            color = (200, 60, 60)
+        pdf.set_font("Helvetica", "B", 18)
+        pdf.set_text_color(*color)
+        pdf.cell(0, 12, "Overall Health Score: " + str(score) + "/100", align="C")
+        pdf.ln(12)
+        pdf.ln(4)
 
-    pdf_bytes = pdf.output()
-    
-    # Safe filename
+        # Details
+        pdf.set_font("Helvetica", "B", 14)
+        pdf.set_text_color(0, 0, 0)
+        pdf.cell(0, 10, "Detailed Analysis & Fixes")
+        pdf.ln(10)
+        pdf.ln(2)
+
+        for name, ok, detail, fix, icon in checks:
+            status = "PASS" if ok else "FAIL"
+            pdf.set_font("Helvetica", "B", 12)
+            if ok:
+                pdf.set_text_color(20, 130, 80)
+            else:
+                pdf.set_text_color(200, 60, 60)
+            pdf.cell(18, 8, "[" + status + "]")
+            pdf.set_text_color(0, 0, 0)
+            pdf.cell(0, 8, _pdf_text(name))
+            pdf.ln(8)
+
+            pdf.set_font("Helvetica", "", 10)
+            pdf.set_text_color(90, 90, 90)
+            pdf.multi_cell(0, 5, _pdf_text("Status: " + str(detail)))
+            if not ok:
+                pdf.set_text_color(40, 60, 180)
+                pdf.multi_cell(0, 5, _pdf_text("Fix: " + str(fix)))
+            pdf.ln(3)
+
+        # Footer CTA
+        pdf.ln(4)
+        pdf.set_font("Helvetica", "B", 13)
+        pdf.set_text_color(0, 0, 0)
+        pdf.cell(0, 9, "Want these issues fixed?")
+        pdf.ln(9)
+        pdf.set_font("Helvetica", "", 11)
+        pdf.cell(0, 7, "Contact Nikhil to fix these problems for your business.")
+        pdf.ln(7)
+        pdf.set_font("Helvetica", "B", 11)
+        pdf.set_text_color(20, 120, 80)
+        pdf.cell(0, 7, "Email: osmnick999@gmail.com")
+        pdf.ln(7)
+
+        pdf_bytes = pdf.output()
+    except Exception as e:
+        return "PDF generation error: " + str(e), 500
+
     safe_filename = u.replace("https://", "").replace("http://", "").replace("/", "_").replace(":", "")
     if not safe_filename:
         safe_filename = "website"
-        
+
     return send_file(
         io.BytesIO(pdf_bytes),
-        mimetype='application/pdf',
+        mimetype="application/pdf",
         as_attachment=True,
-        download_name=f'SiteCheck_{safe_filename}.pdf'
+        download_name="SiteCheck_" + safe_filename + ".pdf",
     )
 
 if __name__ == "__main__":
