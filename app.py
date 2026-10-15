@@ -812,7 +812,7 @@ def download_pdf():
 
         pdf.set_x(left)
         pdf.set_font("Helvetica", "", 11)
-        pdf.cell(full, 7, "Contact Nikhil to fix these problems for your business.")
+        pdf.cell(full, 7, "Contact us to fix these problems for your business.")
         pdf.ln(7)
 
         pdf.set_x(left)
