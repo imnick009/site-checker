@@ -717,6 +717,7 @@ def check():
     return report_html(u, checks)
 
 @app.route("/download-pdf")
+@app.route("/download-pdf")
 def download_pdf():
     url = request.args.get("site", "").strip()
     if not url:
@@ -735,37 +736,49 @@ def download_pdf():
         pdf.add_page()
         pdf.set_auto_page_break(auto=True, margin=15)
 
+        left = pdf.l_margin
+        full = pdf.w - pdf.l_margin - pdf.r_margin
+
+        # Header
+        pdf.set_x(left)
         pdf.set_font("Helvetica", "B", 22)
         pdf.set_text_color(20, 120, 80)
-        pdf.cell(0, 12, "SiteCheck Health Report", align="C")
+        pdf.cell(full, 12, "SiteCheck Health Report", align="C")
         pdf.ln(12)
 
+        pdf.set_x(left)
         pdf.set_font("Helvetica", "", 11)
         pdf.set_text_color(110, 110, 110)
-        pdf.cell(0, 8, _pdf_text("Generated for: " + u), align="C")
+        pdf.cell(full, 8, _pdf_text("Generated for: " + u), align="C")
         pdf.ln(8)
         pdf.ln(4)
 
+        # Score
         if score >= 70:
             color = (20, 130, 80)
         elif score >= 40:
             color = (190, 130, 20)
         else:
             color = (200, 60, 60)
+        pdf.set_x(left)
         pdf.set_font("Helvetica", "B", 18)
         pdf.set_text_color(*color)
-        pdf.cell(0, 12, "Overall Health Score: " + str(score) + "/100", align="C")
+        pdf.cell(full, 12, "Overall Health Score: " + str(score) + "/100", align="C")
         pdf.ln(12)
         pdf.ln(4)
 
+        # Details
+        pdf.set_x(left)
         pdf.set_font("Helvetica", "B", 14)
         pdf.set_text_color(0, 0, 0)
-        pdf.cell(0, 10, "Detailed Analysis & Fixes")
+        pdf.cell(full, 10, "Detailed Analysis & Fixes")
         pdf.ln(10)
         pdf.ln(2)
 
         for name, ok, detail, fix, icon in checks:
             status = "PASS" if ok else "FAIL"
+
+            pdf.set_x(left)
             pdf.set_font("Helvetica", "B", 12)
             if ok:
                 pdf.set_text_color(20, 130, 80)
@@ -773,28 +786,39 @@ def download_pdf():
                 pdf.set_text_color(200, 60, 60)
             pdf.cell(18, 8, "[" + status + "]")
             pdf.set_text_color(0, 0, 0)
-            pdf.cell(0, 8, _pdf_text(name))
+            pdf.cell(full - 18, 8, _pdf_text(name))
             pdf.ln(8)
 
+            pdf.set_x(left)
             pdf.set_font("Helvetica", "", 10)
             pdf.set_text_color(90, 90, 90)
-            pdf.multi_cell(0, 5, _pdf_text("Status: " + str(detail)))
+            pdf.multi_cell(full, 5, _pdf_text("Status: " + str(detail)))
+
             if not ok:
+                pdf.set_x(left)
                 pdf.set_text_color(40, 60, 180)
-                pdf.multi_cell(0, 5, _pdf_text("Fix: " + str(fix)))
+                pdf.multi_cell(full, 5, _pdf_text("Fix: " + str(fix)))
+
+            pdf.set_x(left)
             pdf.ln(3)
 
+        # Footer CTA
+        pdf.set_x(left)
         pdf.ln(4)
         pdf.set_font("Helvetica", "B", 13)
         pdf.set_text_color(0, 0, 0)
-        pdf.cell(0, 9, "Want these issues fixed?")
+        pdf.cell(full, 9, "Want these issues fixed?")
         pdf.ln(9)
+
+        pdf.set_x(left)
         pdf.set_font("Helvetica", "", 11)
-        pdf.cell(0, 7, "Contact Nikhil to fix these problems for your business.")
+        pdf.cell(full, 7, "Contact Nikhil to fix these problems for your business.")
         pdf.ln(7)
+
+        pdf.set_x(left)
         pdf.set_font("Helvetica", "B", 11)
         pdf.set_text_color(20, 120, 80)
-        pdf.cell(0, 7, "Email: osmnick999@gmail.com")
+        pdf.cell(full, 7, "Email: osmnick999@gmail.com")
         pdf.ln(7)
 
         pdf_bytes = pdf.output()
