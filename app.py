@@ -606,6 +606,18 @@ def audit(url):
     except Exception as e:
         return None, str(e)
 
+def _pdf_text(value):
+    text = str(value)
+    fancy = {
+        "\u2013": "-", "\u2014": "-", "\u2015": "-",
+        "\u2018": "'", "\u2019": "'",
+        "\u201c": '"', "\u201d": '"',
+        "\u2026": "...", "\u00a0": " ", "\u20b9": "Rs ",
+    }
+    for old, new in fancy.items():
+        text = text.replace(old, new)
+    return text.encode("latin-1", "replace").decode("latin-1")
+
 def report_html(u, checks):
     passed = sum(1 for c in checks if c[1])
     score = round(passed / len(checks) * 100)
@@ -625,10 +637,7 @@ def report_html(u, checks):
 </div>
 </div>
 </div>"""
-    
-    # Added for PDF URL safety
     safe_u = urllib.parse.quote(u)
-    
     return f"""<!DOCTYPE html>
 <html><head><meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -708,19 +717,6 @@ def check():
     return report_html(u, checks)
 
 @app.route("/download-pdf")
-def _pdf_text(value):
-    text = str(value)
-    fancy = {
-        "\u2013": "-", "\u2014": "-", "\u2015": "-",
-        "\u2018": "'", "\u2019": "'",
-        "\u201c": '"', "\u201d": '"',
-        "\u2026": "...", "\u00a0": " ", "\u20b9": "Rs ",
-    }
-    for old, new in fancy.items():
-        text = text.replace(old, new)
-    return text.encode("latin-1", "replace").decode("latin-1")
-
-@app.route("/download-pdf")
 def download_pdf():
     url = request.args.get("site", "").strip()
     if not url:
@@ -739,7 +735,6 @@ def download_pdf():
         pdf.add_page()
         pdf.set_auto_page_break(auto=True, margin=15)
 
-        # Header
         pdf.set_font("Helvetica", "B", 22)
         pdf.set_text_color(20, 120, 80)
         pdf.cell(0, 12, "SiteCheck Health Report", align="C")
@@ -751,7 +746,6 @@ def download_pdf():
         pdf.ln(8)
         pdf.ln(4)
 
-        # Score
         if score >= 70:
             color = (20, 130, 80)
         elif score >= 40:
@@ -764,7 +758,6 @@ def download_pdf():
         pdf.ln(12)
         pdf.ln(4)
 
-        # Details
         pdf.set_font("Helvetica", "B", 14)
         pdf.set_text_color(0, 0, 0)
         pdf.cell(0, 10, "Detailed Analysis & Fixes")
@@ -791,7 +784,6 @@ def download_pdf():
                 pdf.multi_cell(0, 5, _pdf_text("Fix: " + str(fix)))
             pdf.ln(3)
 
-        # Footer CTA
         pdf.ln(4)
         pdf.set_font("Helvetica", "B", 13)
         pdf.set_text_color(0, 0, 0)
@@ -806,19 +798,19 @@ def download_pdf():
         pdf.ln(7)
 
         pdf_bytes = pdf.output()
+
+        safe_filename = u.replace("https://", "").replace("http://", "").replace("/", "_").replace(":", "")
+        if not safe_filename:
+            safe_filename = "website"
+
+        return send_file(
+            io.BytesIO(pdf_bytes),
+            mimetype="application/pdf",
+            as_attachment=True,
+            download_name="SiteCheck_" + safe_filename + ".pdf",
+        )
     except Exception as e:
         return "PDF generation error: " + str(e), 500
-
-    safe_filename = u.replace("https://", "").replace("http://", "").replace("/", "_").replace(":", "")
-    if not safe_filename:
-        safe_filename = "website"
-
-    return send_file(
-        io.BytesIO(pdf_bytes),
-        mimetype="application/pdf",
-        as_attachment=True,
-        download_name="SiteCheck_" + safe_filename + ".pdf",
-    )
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8080)
