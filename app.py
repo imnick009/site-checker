@@ -358,11 +358,6 @@ def download_pdf():
             self.cell(0, 8, 'Website Health Audit Report', 0, 1, 'R')
             self.ln(10)
 
-        def footer(self):
-            self.set_y(-10)
-            self.set_font('Helvetica', 'I', 8)
-            self.set_text_color(150, 150, 150)
-            self.cell(0, 10, 'hello@nikhilbuilds.com | nikhilbuilds.com', 0, 0, 'C')
 
     try:
         pdf = AuditPDF()
