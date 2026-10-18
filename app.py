@@ -10,7 +10,7 @@ from datetime import datetime
 
 app = Flask(__name__)
 
-# Prevent browser caching
+# Prevent browser caching (Fixes stale results on back button)
 @app.after_request
 def add_header(response):
     response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
@@ -25,10 +25,9 @@ LANDING = """<!DOCTYPE html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="SiteCheck is a free automated website health auditor. Get instant PDF reports covering SEO, speed, security, and mobile-friendliness for any website.">
-<title>SiteCheck — Free Website Health Report by Nikhil</title>
+<meta name="description" content="SiteCheck is a free automated website health auditor.">
+<title>SiteCheck — Free Website Health Report</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -48,8 +47,6 @@ form{display:flex;gap:12px;margin-bottom:28px;}
 input{flex:1;padding:16px 20px;border-radius:12px;border:1px solid var(--line);background:rgba(255,255,255,.05);color:var(--text);font-size:1rem;transition:all .3s;}
 input:focus{outline:none;border-color:var(--accent);background:rgba(255,255,255,.08);box-shadow:0 0 0 3px rgba(74,222,128,.1);}
 button{padding:16px 28px;border-radius:12px;border:none;background:var(--gradient);color:#0a0e27;font-weight:700;font-size:1rem;cursor:pointer;transition:all .3s;position:relative;overflow:hidden;}
-button::before{content:'';position:absolute;top:50%;left:50%;width:0;height:0;border-radius:50%;background:rgba(255,255,255,.3);transform:translate(-50%,-50%);transition:width .6s,height .6s;}
-button:hover::before{width:300px;height:300px;}
 button:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(74,222,128,.3);}
 button:disabled{opacity:.6;cursor:not-allowed;}
 .features{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:28px;}
@@ -69,6 +66,7 @@ footer a:hover{color:var(--accent2);}
 </style>
 </head>
 <body>
+
 <div class="container" id="landingPage">
 <div class="box">
 <div class="logo">🩺 Free Tool</div>
@@ -82,7 +80,7 @@ footer a:hover{color:var(--accent2);}
 <div class="feature"><div class="feature-icon">⚡</div><div class="feature-title">Speed Test</div><div class="feature-desc">Load time & page weight analysis</div></div>
 <div class="feature"><div class="feature-icon">🔒</div><div class="feature-title">Security Check</div><div class="feature-desc">SSL certificate & HTTPS validation</div></div>
 <div class="feature"><div class="feature-icon">📱</div><div class="feature-title">Mobile Ready</div><div class="feature-desc">Responsive design verification</div></div>
-<div class="feature"><div class="feature-icon"></div><div class="feature-title">SEO Audit</div><div class="feature-desc">Title, meta tags, headings check</div></div>
+<div class="feature"><div class="feature-icon">🔍</div><div class="feature-title">SEO Audit</div><div class="feature-desc">Title, meta tags, headings check</div></div>
 </div>
 <footer>
 <span>Built by <strong>Nikhil</strong></span>
@@ -93,64 +91,71 @@ footer a:hover{color:var(--accent2);}
 </div>
 </div>
 
-<!-- Result Container -->
 <div id="resultContainer" class="hidden"></div>
 
 <div class="toast" id="toast">✓ Email copied to clipboard!</div>
+
 <script>
 function copyEmail(e) {
-if(e) e.preventDefault();
-const email = 'hello@nikhilbuilds.com';
-navigator.clipboard.writeText(email).then(() => {
-const toast = document.getElementById('toast');
-toast.classList.add('show');
-setTimeout(() => toast.classList.remove('show'), 2500);
-});
+    if(e) e.preventDefault();
+    const email = 'hello@nikhilbuilds.com';
+    navigator.clipboard.writeText(email).then(() => {
+        const toast = document.getElementById('toast');
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 2500);
+    });
+}
+
+function goBack() {
+    document.getElementById('landingPage').classList.remove('hidden');
+    document.getElementById('resultContainer').classList.add('hidden');
+    document.getElementById('resultContainer').innerHTML = '';
+    
+    const btn = document.getElementById('submitBtn');
+    btn.innerHTML = 'Scan Website';
+    btn.disabled = false;
+    
+    window.history.pushState({}, '', '/');
 }
 
 document.getElementById('checkForm').addEventListener('submit', async function(e) {
-e.preventDefault();
-const btn = document.getElementById('submitBtn');
-const input = document.getElementById('urlInput');
-const url = input.value.trim();
+    e.preventDefault();
+    const btn = document.getElementById('submitBtn');
+    const input = document.getElementById('urlInput');
+    const url = input.value.trim();
 
-if (!url) return;
+    if (!url) return;
 
-// Show loading state
-btn.innerHTML = '<span style="display:inline-block;animation:spin 1s linear infinite;">⏳</span> Scanning...';
-btn.disabled = true;
+    btn.innerHTML = '<span style="display:inline-block;animation:spin 1s linear infinite;">⏳</span> Scanning...';
+    btn.disabled = true;
 
-try {
-    const response = await fetch('/api/check', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: 'url=' + encodeURIComponent(url)
-    });
-    
-    const html = await response.text();
-    
-    // Hide landing, show result
-    document.getElementById('landingPage').classList.add('hidden');
-    document.getElementById('resultContainer').innerHTML = html;
-    document.getElementById('resultContainer').classList.remove('hidden');
-    
-    // Update URL without reload
-    window.history.pushState({}, '', '/');
-    
-} catch (error) {
-    alert('Something went wrong. Please try again.');
-    btn.innerHTML = 'Scan Website';
-    btn.disabled = false;
-}
+    try {
+        const response = await fetch('/api/check', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: 'url=' + encodeURIComponent(url)
+        });
+        
+        const html = await response.text();
+        
+        document.getElementById('landingPage').classList.add('hidden');
+        document.getElementById('resultContainer').innerHTML = html;
+        document.getElementById('resultContainer').classList.remove('hidden');
+        
+        window.history.pushState({}, '', '/');
+        
+    } catch (error) {
+        alert('Something went wrong. Please try again.');
+        btn.innerHTML = 'Scan Website';
+        btn.disabled = false;
+    }
 });
 
-// Handle back button
 window.addEventListener('popstate', function() {
     document.getElementById('landingPage').classList.remove('hidden');
     document.getElementById('resultContainer').classList.add('hidden');
     document.getElementById('resultContainer').innerHTML = '';
     
-    // Reset form
     const btn = document.getElementById('submitBtn');
     btn.innerHTML = 'Scan Website';
     btn.disabled = false;
@@ -215,15 +220,15 @@ def audit(url):
         load = round(time.time() - t0, 2)
         final_url = r.url
         soup = BeautifulSoup(r.text, "html.parser")
-        checks.append(("Page Load Speed", load <= 3, f"{load}s", "Compress images, enable caching, use a CDN.", ""))
+        checks.append(("Page Load Speed", load <= 3, f"{load}s", "Compress images, enable caching, use a CDN.", "⚡"))
         checks.append(("HTTPS / SSL Security", final_url.startswith("https"), "Secure" if final_url.startswith("https") else "NOT secure", "Install a free SSL certificate (Let's Encrypt / Cloudflare).", "🔒"))
         vp = soup.find("meta", attrs={"name": "viewport"}) is not None
-        checks.append(("Mobile Friendly", vp, "Viewport set" if vp else "No viewport tag", "Add mobile viewport meta tag + responsive theme.", ""))
+        checks.append(("Mobile Friendly", vp, "Viewport set" if vp else "No viewport tag", "Add mobile viewport meta tag + responsive theme.", "📱"))
         title = soup.title.string.strip() if soup.title and soup.title.string else ""
         checks.append(("Page Title (SEO)", len(title) >= 10, title or "Missing", "Write a 30-60 character title with your main keyword.", "🏷️"))
         m = soup.find("meta", attrs={"name": "description"})
         desc = m.get("content", "") if m and m.get("content") else ""
-        checks.append(("Meta Description (SEO)", len(desc) >= 50, (desc[:60] + "...") if desc else "Missing", "Add a 120-160 char description - this is what Google shows.", ""))
+        checks.append(("Meta Description (SEO)", len(desc) >= 50, (desc[:60] + "...") if desc else "Missing", "Add a 120-160 char description - this is what Google shows.", "📝"))
         h1 = soup.find("h1")
         checks.append(("H1 Heading", h1 is not None, h1.get_text(strip=True)[:60] if h1 else "Missing", "Use exactly one H1 that states what the page is about.", "📋"))
         imgs = soup.find_all("img")
@@ -272,7 +277,7 @@ def report_html(u, checks):
 <div class="score-label">Health Score</div>
 <div class="progress-bar"><div class="progress-fill" style="width:{score}%"></div></div>
 </div>
-<div class="section-title">📊 Detailed Analysis</div>
+<div class="section-title"> Detailed Analysis</div>
 {rows}
 <div class="cta">
 <h2>Want these issues fixed for you?</h2>
