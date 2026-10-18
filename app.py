@@ -431,19 +431,24 @@ def download_pdf():
             
             pdf.ln(4)
         
-        pdf.set_y(257)
-        pdf.set_fill_color(34, 211, 238)
-        pdf.rect(15, pdf.get_y(), 180, 30, 'F')
-        
-        pdf.set_font('Helvetica', 'B', 13)
-        pdf.set_text_color(0, 0, 0)
-        pdf.set_x(15)
-        pdf.cell(0, 10, "Need help fixing these issues?", 0, 1, 'C')
-        
-        pdf.set_font('Helvetica', '', 12)
-        pdf.set_text_color(0, 0, 0)
-        pdf.set_x(15)
-        pdf.cell(0, 10, "Contact me: hello@nikhilbuilds.com", 0, 1, 'C')
+pdf.set_y(245)
+pdf.set_fill_color(34, 211, 238)
+pdf.rect(0, pdf.get_y(), 210, 50, 'F')  # Full width (0 se 210)
+
+pdf.set_font('Helvetica', 'B', 14)
+pdf.set_text_color(0, 0, 0)
+pdf.set_x(0)
+pdf.cell(210, 12, "Need help fixing these issues?", 0, 1, 'C')
+
+pdf.set_font('Helvetica', '', 12)
+pdf.set_text_color(0, 0, 0)
+pdf.set_x(0)
+pdf.cell(210, 10, "Contact me: hello@nikhilbuilds.com", 0, 1, 'C')
+
+pdf.set_font('Helvetica', 'I', 9)
+pdf.set_text_color(50, 50, 50)
+pdf.set_x(0)
+pdf.cell(210, 10, "hello@nikhilbuilds.com | nikhilbuilds.com", 0, 1, 'C')
 
         pdf_bytes = pdf.output()
         safe_filename = u.replace("https://", "").replace("http://", "").replace("/", "_").replace(":", "")[:30]
