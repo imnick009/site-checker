@@ -79,14 +79,14 @@ footer a:hover{color:var(--accent2);}
 <button type="submit" id="submitBtn">Scan Website</button>
 </form>
 <div class="features">
-<div class="feature"><div class="feature-icon">⚡</div><div class="feature-title">Speed Test</div><div class="feature-desc">Load time & page weight analysis</div></div>
+<div class="feature"><div class="feature-icon"></div><div class="feature-title">Speed Test</div><div class="feature-desc">Load time & page weight analysis</div></div>
 <div class="feature"><div class="feature-icon">🔒</div><div class="feature-title">Security Check</div><div class="feature-desc">SSL certificate & HTTPS validation</div></div>
-<div class="feature"><div class="feature-icon">📱</div><div class="feature-title">Mobile Ready</div><div class="feature-desc">Responsive design verification</div></div>
-<div class="feature"><div class="feature-icon">🔍</div><div class="feature-title">SEO Audit</div><div class="feature-desc">Title, meta tags, headings check</div></div>
+<div class="feature"><div class="feature-icon"></div><div class="feature-title">Mobile Ready</div><div class="feature-desc">Responsive design verification</div></div>
+<div class="feature"><div class="feature-icon"></div><div class="feature-title">SEO Audit</div><div class="feature-desc">Title, meta tags, headings check</div></div>
 </div>
 <footer>
 <span>Built by <strong>Nikhil</strong></span>
-<a href="https://nikhilbuilds.com" target="_blank">Portfolio</a>
+<a href="https://nikhilbuilds.com" target="_blank">NikhilBuilds.Com</a>
 <a href="https://github.com/imnick009" target="_blank">GitHub</a>
 <a href="#" onclick="copyEmail(event)">hello&#64;nikhilbuilds.com</a>
 </footer>
@@ -221,7 +221,7 @@ def audit(url):
         final_url = r.url
         soup = BeautifulSoup(r.text, "html.parser")
         checks.append(("Page Load Speed", load <= 3, f"{load}s", "Compress images, enable caching, use a CDN.", "⚡"))
-        checks.append(("HTTPS / SSL Security", final_url.startswith("https"), "Secure" if final_url.startswith("https") else "NOT secure", "Install a free SSL certificate (Let's Encrypt / Cloudflare).", "🔒"))
+        checks.append(("HTTPS / SSL Security", final_url.startswith("https"), "Secure" if final_url.startswith("https") else "NOT secure", "Install a free SSL certificate (Let's Encrypt / Cloudflare).", ""))
         vp = soup.find("meta", attrs={"name": "viewport"}) is not None
         checks.append(("Mobile Friendly", vp, "Viewport set" if vp else "No viewport tag", "Add mobile viewport meta tag + responsive theme.", "📱"))
         title = soup.title.string.strip() if soup.title and soup.title.string else ""
@@ -293,7 +293,7 @@ def report_html(u, checks):
         <a href="#" class="cta-btn cta-btn-secondary" onclick="copyEmail(event)">✉️ hello&#64;nikhilbuilds.com</a>
     </div>
     <div class="cta-links">
-        <a href="https://nikhilbuilds.com" target="_blank"> Portfolio</a>
+        <a href="https://nikhilbuilds.com" target="_blank">NikhilBuilds.Com</a>
         <a href="https://github.com/imnick009" target="_blank">🐙 GitHub</a>
     </div>
 </div>
@@ -302,10 +302,10 @@ def report_html(u, checks):
 def error_html(msg):
     return f"""<style>{CSS}</style><div class="wrap">
 <a class="back" onclick="goBack()">← Try again</a>
-<h1> Site<span>Check</span></h1>
+<h1>🩺 Site<span>Check</span></h1>
 <div class="row row-fail">
 <div class="row-header">
-<div class="row-icon"></div>
+<div class="row-icon">❌</div>
 <div class="row-content">
 <div class="row-name">Could not scan this website</div>
 <div class="row-detail">{msg}</div>
@@ -347,38 +347,36 @@ def download_pdf():
     class AuditPDF(FPDF):
         def header(self):
             self.set_fill_color(34, 211, 238)
-            self.rect(0, 0, 210, 28, 'F')  # Height 25 se 28 ki (badi)
+            self.rect(0, 0, 210, 28, 'F')
             self.set_y(5)
             self.set_x(15)
-            self.set_font('Helvetica', 'B', 20)  # Size 18 se 20 ki (badi)
+            self.set_font('Helvetica', 'B', 20)
             self.set_text_color(255, 255, 255)
-            self.cell(0, 9, 'NikhilBuilds.Com', 0, 1, 'L')  # Line height 8 se 9
+            self.cell(0, 9, 'NikhilBuilds.Com', 0, 1, 'L')
             self.set_x(15)
-            self.set_font('Helvetica', '', 10)  # Size 9 se 10 ki
-            self.cell(0, 7, 'Website Health Audit Report', 0, 1, 'R')  # Line height 6 se 7
+            self.set_font('Helvetica', '', 10)
+            self.cell(0, 7, 'Website Health Audit Report', 0, 1, 'R')
             self.ln(8)
 
         def footer(self):
-            # Footer at absolute bottom - compact
-            self.set_y(-30)  # 30mm from bottom (height kam)
+            self.set_y(-30)
             self.set_fill_color(34, 211, 238)
-            self.rect(0, self.get_y(), 210, 30, 'F')  # Height 35 se 30 ki
+            self.rect(0, self.get_y(), 210, 30, 'F')
             
             self.set_font('Helvetica', 'B', 12)
             self.set_text_color(0, 0, 0)
             self.set_x(0)
-            self.cell(210, 9, "Need help fixing these issues?", 0, 1, 'C')  # Height 10 se 9
+            self.cell(210, 9, "Need help fixing these issues?", 0, 1, 'C')
             
             self.set_font('Helvetica', '', 11)
             self.set_text_color(0, 0, 0)
             self.set_x(0)
-            self.cell(210, 8, "Contact me: hello@nikhilbuilds.com", 0, 1, 'C')  # Height 9 se 8
+            self.cell(210, 8, "Contact me: hello@nikhilbuilds.com", 0, 1, 'C')
             
-            # Sirf website, bada aur clear - duplicate email hata diya
-            self.set_font('Helvetica', 'B', 13)  # Bada font (13pt)
+            self.set_font('Helvetica', 'B', 13)
             self.set_text_color(0, 0, 0)
             self.set_x(0)
-            self.cell(210, 8, "NikhilBuilds.Com", 0, 1, 'C')  # Sirf website
+            self.cell(210, 8, "NikhilBuilds.Com", 0, 1, 'C')
 
     try:
         pdf = AuditPDF()
