@@ -15,6 +15,7 @@ LANDING="""<!DOCTYPE html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="SiteCheck is a free automated website health auditor. Get instant PDF reports covering SEO, speed, security, and mobile-friendliness for any website.">
 <title>SiteCheck — Free Website Health Report by Nikhil</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -271,7 +272,7 @@ button{width:100%}
 </div>
 <footer>
 <span>Built by <strong>Nikhil</strong></span>
-<a href="https://imnick009.github.io" target="_blank">Portfolio</a>
+<a href="https://nikhilbuilds.com" target="_blank">Portfolio</a>
 <a href="https://github.com/imnick009" target="_blank">GitHub</a>
 <a href="#" onclick="copyEmail(event)">hello@nikhilbuilds.com</a>
 </footer>
@@ -641,6 +642,7 @@ def report_html(u, checks):
     return f"""<!DOCTYPE html>
 <html><head><meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="SiteCheck is a free automated website health auditor. Get instant PDF reports covering SEO, speed, security, and mobile-friendliness for any website.">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <title>SiteCheck Report</title><style>{CSS}</style></head>
 <body><div class="wrap">
@@ -662,7 +664,7 @@ def report_html(u, checks):
 <div class="cta-links">
 <a href="/download-pdf?site={safe_u}" target="_blank" class="email-btn" style="background: linear-gradient(135deg, #60a5fa 0%, #4ade80 100%);">📥 Download PDF Report</a>
 <a href="#" class="email-btn" onclick="copyEmail(event)">hello@nikhilbuilds.com</a>
-<a href="https://imnick009.github.io" target="_blank">🌐 Portfolio</a>
+<a href="https://nikhilbuilds.com" target="_blank">🌐 Portfolio</a>
 <a href="https://github.com/imnick009" target="_blank">🐙 GitHub</a>
 </div>
 </div>
@@ -716,7 +718,6 @@ def check():
         return error_html(err)
     return report_html(u, checks)
 
-@app.route("/download-pdf")
 @app.route("/download-pdf")
 def download_pdf():
     url = request.args.get("site", "").strip()
