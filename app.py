@@ -347,19 +347,37 @@ def download_pdf():
     class AuditPDF(FPDF):
         def header(self):
             self.set_fill_color(34, 211, 238)
-            self.rect(0, 0, 210, 25, 'F')  # Height 32 se 25 ki
+            self.rect(0, 0, 210, 25, 'F')
             self.set_y(5)
             self.set_x(15)
-            self.set_font('Helvetica', 'B', 18)  # Size 22 se 18 ki
+            self.set_font('Helvetica', 'B', 18)
             self.set_text_color(255, 255, 255)
-            self.cell(0, 8, 'NikhilBuilds', 0, 1, 'L')  # Text change
+            self.cell(0, 8, 'NikhilBuilds.Com', 0, 1, 'L')  # Changed to .Com
             self.set_x(15)
             self.set_font('Helvetica', '', 9)
             self.cell(0, 6, 'Website Health Audit Report', 0, 1, 'R')
             self.ln(8)
 
         def footer(self):
-            pass
+            # Footer at absolute bottom
+            self.set_y(-35)  # 35mm from bottom
+            self.set_fill_color(34, 211, 238)
+            self.rect(0, self.get_y(), 210, 35, 'F')
+            
+            self.set_font('Helvetica', 'B', 12)
+            self.set_text_color(0, 0, 0)
+            self.set_x(0)
+            self.cell(210, 10, "Need help fixing these issues?", 0, 1, 'C')
+            
+            self.set_font('Helvetica', '', 11)
+            self.set_text_color(0, 0, 0)
+            self.set_x(0)
+            self.cell(210, 9, "Contact me: hello@nikhilbuilds.com", 0, 1, 'C')
+            
+            self.set_font('Helvetica', 'I', 8)
+            self.set_text_color(50, 50, 50)
+            self.set_x(0)
+            self.cell(210, 8, "hello@nikhilbuilds.com | nikhilbuilds.com", 0, 1, 'C')
 
     try:
         pdf = AuditPDF()
@@ -379,21 +397,21 @@ def download_pdf():
         pdf.set_fill_color(*box_bg)
         pdf.set_draw_color(34, 211, 238)
         pdf.set_line_width(0.5)
-        pdf.rect(15, pdf.get_y(), 180, 25, 'DF')  # Height 30 se 25 ki
+        pdf.rect(15, pdf.get_y(), 180, 25, 'DF')
         
         pdf.set_font('Helvetica', 'B', 10)
         pdf.set_text_color(100, 100, 100)
         pdf.set_x(15)
         pdf.cell(0, 7, "OVERALL HEALTH SCORE", 0, 1, 'C')
         
-        pdf.set_font('Helvetica', 'B', 24)  # Size 28 se 24 ki
+        pdf.set_font('Helvetica', 'B', 24)
         pdf.set_text_color(*score_color)
         pdf.set_x(15)
         pdf.cell(0, 12, f"{score} / 100", 0, 1, 'C')
         
         pdf.ln(6)
         
-        pdf.set_font('Helvetica', 'B', 12)  # Size 14 se 12 ki
+        pdf.set_font('Helvetica', 'B', 12)
         pdf.set_text_color(34, 211, 238)
         pdf.cell(0, 7, "DETAILED ANALYSIS", 0, 1)
         pdf.set_draw_color(34, 211, 238)
@@ -405,50 +423,30 @@ def download_pdf():
             status = "PASS" if ok else "FAIL"
             status_color = (34, 197, 94) if ok else (239, 68, 68)
             
-            pdf.set_font('Helvetica', 'B', 10)  # Size 11 se 10 ki
+            pdf.set_font('Helvetica', 'B', 10)
             pdf.set_text_color(*status_color)
             pdf.cell(25, 7, f"[{status}]", 0, 0)
             
-            pdf.set_font('Helvetica', 'B', 11)  # Size 12 se 11 ki
+            pdf.set_font('Helvetica', 'B', 11)
             pdf.set_text_color(30, 30, 30)
             pdf.cell(0, 7, name, 0, 1)
             
-            pdf.set_font('Helvetica', '', 10)  # Size 11 se 10 ki
+            pdf.set_font('Helvetica', '', 10)
             pdf.set_text_color(100, 100, 100)
             clean_detail = _pdf_text(str(detail))[:70]
             pdf.set_x(15)
-            pdf.cell(0, 5, f"Result: {clean_detail}", 0, 1)  # Height 6 se 5 ki
+            pdf.cell(0, 5, f"Result: {clean_detail}", 0, 1)
             
             if not ok:
                 pdf.set_x(15)
-                pdf.set_font('Helvetica', 'I', 10)  # Size 11 se 10 ki
+                pdf.set_font('Helvetica', 'I', 10)
                 pdf.set_text_color(239, 68, 68)
                 clean_fix = _pdf_text(str(fix))[:80]
-                pdf.cell(0, 5, f"Fix: {clean_fix}", 0, 1)  # Height 6 se 5 ki
+                pdf.cell(0, 5, f"Fix: {clean_fix}", 0, 1)
             
-            pdf.ln(3)  # Spacing 4 se 3 ki
-        
-        # Footer - Compact aur page bottom se pehle
-        pdf.ln(5)  # Spacing 8 se 5 ki
-        pdf.set_y(255)  # 245 se 255 kiya (thoda neeche)
-        pdf.set_fill_color(34, 211, 238)
-        pdf.rect(0, pdf.get_y(), 210, 35, 'F')  # Height 50 se 35 ki, x 15 se 0
-        
-        pdf.set_font('Helvetica', 'B', 12)  # Size 14 se 12 ki
-        pdf.set_text_color(0, 0, 0)
-        pdf.set_x(0)
-        pdf.cell(210, 10, "Need help fixing these issues?", 0, 1, 'C')  # Height 12 se 10
-        
-        pdf.set_font('Helvetica', '', 11)  # Size 12 se 11 ki
-        pdf.set_text_color(0, 0, 0)
-        pdf.set_x(0)
-        pdf.cell(210, 9, "Contact me: hello@nikhilbuilds.com", 0, 1, 'C')  # Height 10 se 9
-        
-        pdf.set_font('Helvetica', 'I', 8)  # Size 9 se 8 ki
-        pdf.set_text_color(50, 50, 50)
-        pdf.set_x(0)
-        pdf.cell(210, 8, "hello@nikhilbuilds.com | nikhilbuilds.com", 0, 1, 'C')  # Height 10 se 8
+            pdf.ln(3)
 
+        # No manual footer box needed - footer() method handle karega
         pdf_bytes = pdf.output()
         safe_filename = u.replace("https://", "").replace("http://", "").replace("/", "_").replace(":", "")[:30]
         
