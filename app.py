@@ -313,7 +313,6 @@ def download_pdf():
 
     class AuditPDF(FPDF):
         def header(self):
-            # Full-width cyan header bar
             self.set_fill_color(34, 211, 238)
             self.rect(0, 0, 210, 30, 'F')
             
@@ -342,7 +341,7 @@ def download_pdf():
         pdf = AuditPDF()
         pdf.add_page()
         pdf.set_margins(15, 35, 15)
-        pdf.set_auto_page_break(auto=False, margin=0)  # NO AUTO BREAK - Single page only
+        pdf.set_auto_page_break(auto=False, margin=0)
         
         # 1. Website Info
         pdf.set_font('Helvetica', '', 10)
@@ -381,29 +380,25 @@ def download_pdf():
         pdf.line(15, pdf.get_y(), 70, pdf.get_y())
         pdf.ln(3)
         
-        # 4. Checks - Compact but readable
+        # 4. Checks - Compact
         for name, ok, detail, fix, icon in checks:
             status = "PASS" if ok else "FAIL"
             status_color = (34, 197, 94) if ok else (239, 68, 68)
             
-            # Status Badge
             pdf.set_font('Helvetica', 'B', 9)
             pdf.set_text_color(*status_color)
             pdf.cell(20, 6, f"[{status}]", 0, 0)
             
-            # Check Name
             pdf.set_font('Helvetica', 'B', 10)
             pdf.set_text_color(30, 30, 30)
             pdf.cell(0, 6, name, 0, 1)
             
-            # Detail (truncated to fit)
             pdf.set_font('Helvetica', '', 9)
             pdf.set_text_color(100, 100, 100)
             clean_detail = _pdf_text(str(detail))[:60]
             pdf.set_x(15)
             pdf.cell(0, 5, f"Result: {clean_detail}", 0, 1)
             
-            # Fix (if failed, truncated)
             if not ok:
                 pdf.set_x(15)
                 pdf.set_font('Helvetica', 'I', 9)
@@ -411,22 +406,22 @@ def download_pdf():
                 clean_fix = _pdf_text(str(fix))[:70]
                 pdf.cell(0, 5, f"Fix: {clean_fix}", 0, 1)
             
-            pdf.ln(2)  # Minimal spacing between items
+            pdf.ln(2)
         
-        # 5. CTA Box - At the end (no new page)
-        pdf.ln(4)
+        # 5. CTA Box - FIXED POSITION near footer (at Y=245, just above footer)
+        pdf.set_y(245)  # Fixed position, 25mm above bottom
         pdf.set_fill_color(34, 211, 238)
-        pdf.rect(15, pdf.get_y(), 180, 20, 'F')
+        pdf.rect(15, pdf.get_y(), 180, 22, 'F')
         
-        pdf.set_font('Helvetica', 'B', 11)
+        pdf.set_font('Helvetica', 'B', 12)
         pdf.set_text_color(0, 0, 0)
         pdf.set_x(15)
-        pdf.cell(0, 7, "Need help fixing these issues?", 0, 1, 'C')
+        pdf.cell(0, 8, "Need help fixing these issues?", 0, 1, 'C')
         
-        pdf.set_font('Helvetica', '', 10)
+        pdf.set_font('Helvetica', '', 11)
         pdf.set_text_color(0, 0, 0)
         pdf.set_x(15)
-        pdf.cell(0, 7, "hello@nikhilbuilds.com", 0, 1, 'C')
+        pdf.cell(0, 8, "hello@nikhilbuilds.com", 0, 1, 'C')
 
         pdf_bytes = pdf.output()
         safe_filename = u.replace("https://", "").replace("http://", "").replace("/", "_").replace(":", "")[:30]
