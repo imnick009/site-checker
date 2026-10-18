@@ -1,6 +1,6 @@
 # 🩺 SiteCheck — Free Website Health Checker
 
-**🔴 Live Demo:** [https://site-checker-bav1.vercel.app](https://site-checker-bav1.vercel.app)
+**🔴 Live Demo:** https://sitecheck.nikhilbuilds.com/
 
 SiteCheck is a free, instant website audit tool. Enter any URL and get a professional health report covering speed, security, mobile-friendliness and SEO — in seconds.
 
