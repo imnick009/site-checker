@@ -5,10 +5,15 @@ import io
 import urllib.parse
 from bs4 import BeautifulSoup
 from fpdf import FPDF
+from datetime import datetime
 
 app = Flask(__name__)
 
 UA = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
+
+# ... [LANDING and CSS variables remain exactly the same as your previous code] ...
+# (Main yahan space bachane ke liye skip kar raha hoon, tumhara purana LANDING aur CSS waisa hi rahega)
+# Bas niche wala hissa replace karna hai.
 
 LANDING = """<!DOCTYPE html>
 <html lang="en">
@@ -22,221 +27,37 @@ LANDING = """<!DOCTYPE html>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-:root{
---bg:#0a0e27;
---panel:rgba(16,24,32,.85);
---line:rgba(255,255,255,.08);
---text:#e6edf3;
---muted:#9aa9b8;
---accent:#4ade80;
---accent2:#60a5fa;
---gradient:linear-gradient(135deg,#4ade80 0%,#60a5fa 100%);
-}
-body{
-background:var(--bg);
-color:var(--text);
-font-family:'Inter',system-ui,sans-serif;
-line-height:1.6;
-min-height:100vh;
-overflow-x:hidden;
-position:relative;
-}
-body::before{
-content:'';
-position:fixed;
-top:0;left:0;right:0;bottom:0;
-background:
-radial-gradient(circle at 20% 50%,rgba(74,222,128,.15) 0%,transparent 50%),
-radial-gradient(circle at 80% 80%,rgba(96,165,250,.15) 0%,transparent 50%),
-radial-gradient(circle at 40% 20%,rgba(168,85,247,.1) 0%,transparent 40%);
-animation:bgMove 20s ease-in-out infinite;
-z-index:0;
-}
-@keyframes bgMove{
-0%,100%{transform:translate(0,0)}
-50%{transform:translate(-20px,20px)}
-}
-.container{
-position:relative;
-z-index:1;
-min-height:100vh;
-display:flex;
-align-items:center;
-justify-content:center;
-padding:24px;
-}
-.box{
-max-width:680px;
-width:100%;
-background:var(--panel);
-backdrop-filter:blur(20px);
-border:1px solid var(--line);
-border-radius:24px;
-padding:48px;
-box-shadow:0 20px 60px rgba(0,0,0,.5);
-animation:fadeInUp .6s ease;
-}
-@keyframes fadeInUp{
-from{opacity:0;transform:translateY(30px)}
-to{opacity:1;transform:translateY(0)}
-}
-.logo{
-display:inline-block;
-padding:8px 16px;
-background:var(--gradient);
-border-radius:999px;
-font-size:.85rem;
-font-weight:600;
-margin-bottom:20px;
-animation:pulse 2s ease-in-out infinite;
-}
-@keyframes pulse{
-0%,100%{opacity:1}
-50%{opacity:.8}
-}
-h1{
-font-size:2.8rem;
-font-weight:800;
-line-height:1.1;
-margin-bottom:12px;
-letter-spacing:-.02em;
-}
-h1 span{
-background:var(--gradient);
--webkit-background-clip:text;
--webkit-text-fill-color:transparent;
-background-clip:text;
-}
-p.sub{
-color:var(--muted);
-font-size:1.1rem;
-margin-bottom:32px;
-}
-form{
-display:flex;
-gap:12px;
-margin-bottom:28px;
-}
-input{
-flex:1;
-padding:16px 20px;
-border-radius:12px;
-border:1px solid var(--line);
-background:rgba(255,255,255,.05);
-color:var(--text);
-font-size:1rem;
-transition:all .3s;
-}
-input:focus{
-outline:none;
-border-color:var(--accent);
-background:rgba(255,255,255,.08);
-box-shadow:0 0 0 3px rgba(74,222,128,.1);
-}
-button{
-padding:16px 28px;
-border-radius:12px;
-border:none;
-background:var(--gradient);
-color:#0a0e27;
-font-weight:700;
-font-size:1rem;
-cursor:pointer;
-transition:all .3s;
-position:relative;
-overflow:hidden;
-}
-button::before{
-content:'';
-position:absolute;
-top:50%;left:50%;
-width:0;height:0;
-border-radius:50%;
-background:rgba(255,255,255,.3);
-transform:translate(-50%,-50%);
-transition:width .6s,height .6s;
-}
-button:hover::before{
-width:300px;height:300px;
-}
-button:hover{
-transform:translateY(-2px);
-box-shadow:0 8px 24px rgba(74,222,128,.3);
-}
-.features{
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
-gap:16px;
-margin-bottom:28px;
-}
-.feature{
-background:rgba(255,255,255,.03);
-border:1px solid var(--line);
-border-radius:12px;
-padding:16px;
-transition:all .3s;
-}
-.feature:hover{
-background:rgba(255,255,255,.06);
-transform:translateY(-2px);
-}
-.feature-icon{
-font-size:1.5rem;
-margin-bottom:8px;
-}
-.feature-title{
-font-weight:600;
-font-size:.95rem;
-margin-bottom:4px;
-}
-.feature-desc{
-color:var(--muted);
-font-size:.85rem;
-}
-footer{
-padding-top:28px;
-border-top:1px solid var(--line);
-color:var(--muted);
-font-size:.9rem;
-display:flex;
-gap:20px;
-flex-wrap:wrap;
-align-items:center;
-justify-content: center;
-}
-footer a{
-color:var(--accent);
-text-decoration:none;
-transition:color .2s;
-cursor:pointer;
-}
-footer a:hover{
-color:var(--accent2);
-}
-.toast{
-position:fixed;
-bottom:30px;
-left:50%;
-transform:translateX(-50%) translateY(100px);
-background:var(--gradient);
-color:#0a0e27;
-padding:14px 28px;
-border-radius:12px;
-font-weight:700;
-font-size:.95rem;
-box-shadow:0 8px 32px rgba(74,222,128,.4);
-transition:transform .3s ease;
-z-index:9999;
-}
-.toast.show{
-transform:translateX(-50%) translateY(0);
-}
-@media(max-width:640px){
-.box{padding:32px 24px}
-h1{font-size:2rem}
-form{flex-direction:column}
-button{width:100%}
-}
+:root{--bg:#0a0e27;--panel:rgba(16,24,32,.85);--line:rgba(255,255,255,.08);--text:#e6edf3;--muted:#9aa9b8;--accent:#4ade80;--accent2:#60a5fa;--gradient:linear-gradient(135deg,#4ade80 0%,#60a5fa 100%);}
+body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;line-height:1.6;min-height:100vh;overflow-x:hidden;position:relative;}
+body::before{content:'';position:fixed;top:0;left:0;right:0;bottom:0;background:radial-gradient(circle at 20% 50%,rgba(74,222,128,.15) 0%,transparent 50%),radial-gradient(circle at 80% 80%,rgba(96,165,250,.15) 0%,transparent 50%),radial-gradient(circle at 40% 20%,rgba(168,85,247,.1) 0%,transparent 40%);animation:bgMove 20s ease-in-out infinite;z-index:0;}
+@keyframes bgMove{0%,100%{transform:translate(0,0)}50%{transform:translate(-20px,20px)}}
+.container{position:relative;z-index:1;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;}
+.box{max-width:680px;width:100%;background:var(--panel);backdrop-filter:blur(20px);border:1px solid var(--line);border-radius:24px;padding:48px;box-shadow:0 20px 60px rgba(0,0,0,.5);animation:fadeInUp .6s ease;}
+@keyframes fadeInUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+.logo{display:inline-block;padding:8px 16px;background:var(--gradient);border-radius:999px;font-size:.85rem;font-weight:600;margin-bottom:20px;animation:pulse 2s ease-in-out infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.8}}
+h1{font-size:2.8rem;font-weight:800;line-height:1.1;margin-bottom:12px;letter-spacing:-.02em;}
+h1 span{background:var(--gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+p.sub{color:var(--muted);font-size:1.1rem;margin-bottom:32px;}
+form{display:flex;gap:12px;margin-bottom:28px;}
+input{flex:1;padding:16px 20px;border-radius:12px;border:1px solid var(--line);background:rgba(255,255,255,.05);color:var(--text);font-size:1rem;transition:all .3s;}
+input:focus{outline:none;border-color:var(--accent);background:rgba(255,255,255,.08);box-shadow:0 0 0 3px rgba(74,222,128,.1);}
+button{padding:16px 28px;border-radius:12px;border:none;background:var(--gradient);color:#0a0e27;font-weight:700;font-size:1rem;cursor:pointer;transition:all .3s;position:relative;overflow:hidden;}
+button::before{content:'';position:absolute;top:50%;left:50%;width:0;height:0;border-radius:50%;background:rgba(255,255,255,.3);transform:translate(-50%,-50%);transition:width .6s,height .6s;}
+button:hover::before{width:300px;height:300px;}
+button:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(74,222,128,.3);}
+.features{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:28px;}
+.feature{background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:12px;padding:16px;transition:all .3s;}
+.feature:hover{background:rgba(255,255,255,.06);transform:translateY(-2px);}
+.feature-icon{font-size:1.5rem;margin-bottom:8px;}
+.feature-title{font-weight:600;font-size:.95rem;margin-bottom:4px;}
+.feature-desc{color:var(--muted);font-size:.85rem;}
+footer{padding-top:28px;border-top:1px solid var(--line);color:var(--muted);font-size:.9rem;display:flex;gap:20px;flex-wrap:wrap;align-items:center;justify-content:center;}
+footer a{color:var(--accent);text-decoration:none;transition:color .2s;cursor:pointer;}
+footer a:hover{color:var(--accent2);}
+.toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--gradient);color:#0a0e27;padding:14px 28px;border-radius:12px;font-weight:700;font-size:.95rem;box-shadow:0 8px 32px rgba(74,222,128,.4);transition:transform .3s ease;z-index:9999;}
+.toast.show{transform:translateX(-50%) translateY(0);}
+@media(max-width:640px){.box{padding:32px 24px}h1{font-size:2rem}form{flex-direction:column}button{width:100%}}
 </style>
 </head>
 <body>
@@ -250,26 +71,10 @@ button{width:100%}
 <button type="submit" id="submitBtn">Scan Website</button>
 </form>
 <div class="features">
-<div class="feature">
-<div class="feature-icon">⚡</div>
-<div class="feature-title">Speed Test</div>
-<div class="feature-desc">Load time & page weight analysis</div>
-</div>
-<div class="feature">
-<div class="feature-icon">🔒</div>
-<div class="feature-title">Security Check</div>
-<div class="feature-desc">SSL certificate & HTTPS validation</div>
-</div>
-<div class="feature">
-<div class="feature-icon">📱</div>
-<div class="feature-title">Mobile Ready</div>
-<div class="feature-desc">Responsive design verification</div>
-</div>
-<div class="feature">
-<div class="feature-icon">🔍</div>
-<div class="feature-title">SEO Audit</div>
-<div class="feature-desc">Title, meta tags, headings check</div>
-</div>
+<div class="feature"><div class="feature-icon">⚡</div><div class="feature-title">Speed Test</div><div class="feature-desc">Load time & page weight analysis</div></div>
+<div class="feature"><div class="feature-icon">🔒</div><div class="feature-title">Security Check</div><div class="feature-desc">SSL certificate & HTTPS validation</div></div>
+<div class="feature"><div class="feature-icon">📱</div><div class="feature-title">Mobile Ready</div><div class="feature-desc">Responsive design verification</div></div>
+<div class="feature"><div class="feature-icon">🔍</div><div class="feature-title">SEO Audit</div><div class="feature-desc">Title, meta tags, headings check</div></div>
 </div>
 <footer>
 <span>Built by <strong>Nikhil</strong></span>
@@ -293,10 +98,7 @@ setTimeout(() => toast.classList.remove('show'), 2500);
 document.getElementById('checkForm').addEventListener('submit', function(e) {
 const btn = document.getElementById('submitBtn');
 const input = document.getElementById('urlInput');
-if (!input.value.trim()) {
-e.preventDefault();
-return;
-}
+if (!input.value.trim()) { e.preventDefault(); return; }
 btn.innerHTML = '<span style="display:inline-block;animation:spin 1s linear infinite;">⏳</span> Scanning...';
 btn.disabled = true;
 btn.style.opacity = '.7';
@@ -307,292 +109,50 @@ btn.style.opacity = '.7';
 
 CSS = """
 *{margin:0;padding:0;box-sizing:border-box}
-:root{
---bg:#0a0e27;
---panel:rgba(16,24,32,.85);
---line:rgba(255,255,255,.08);
---text:#e6edf3;
---muted:#9aa9b8;
---accent:#4ade80;
---accent2:#60a5fa;
---danger:#f87171;
---warning:#fbbf24;
---gradient:linear-gradient(135deg,#4ade80 0%,#60a5fa 100%);
-}
-body{
-background:var(--bg);
-color:var(--text);
-font-family:'Inter',system-ui,sans-serif;
-line-height:1.6;
-min-height:100vh;
-padding:32px 24px;
-}
-body::before{
-content:'';
-position:fixed;
-top:0;left:0;right:0;bottom:0;
-background:
-radial-gradient(circle at 20% 50%,rgba(74,222,128,.15) 0%,transparent 50%),
-radial-gradient(circle at 80% 80%,rgba(96,165,250,.15) 0%,transparent 50%);
-z-index:0;
-}
-.wrap{
-max-width:800px;
-margin:0 auto;
-position:relative;
-z-index:1;
-animation:fadeIn .5s ease;
-}
-@keyframes fadeIn{
-from{opacity:0}
-to{opacity:1}
-}
-@keyframes slideUp{
-from{opacity:0;transform:translateY(20px)}
-to{opacity:1;transform:translateY(0)}
-}
-.back{
-display:inline-flex;
-align-items:center;
-gap:6px;
-color:var(--muted);
-text-decoration:none;
-font-size:.9rem;
-margin-bottom:20px;
-transition:color .2s;
-}
+:root{--bg:#0a0e27;--panel:rgba(16,24,32,.85);--line:rgba(255,255,255,.08);--text:#e6edf3;--muted:#9aa9b8;--accent:#4ade80;--accent2:#60a5fa;--danger:#f87171;--warning:#fbbf24;--gradient:linear-gradient(135deg,#4ade80 0%,#60a5fa 100%);}
+body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;line-height:1.6;min-height:100vh;padding:32px 24px;}
+body::before{content:'';position:fixed;top:0;left:0;right:0;bottom:0;background:radial-gradient(circle at 20% 50%,rgba(74,222,128,.15) 0%,transparent 50%),radial-gradient(circle at 80% 80%,rgba(96,165,250,.15) 0%,transparent 50%);z-index:0;}
+.wrap{max-width:800px;margin:0 auto;position:relative;z-index:1;animation:fadeIn .5s ease;}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.back{display:inline-flex;align-items:center;gap:6px;color:var(--muted);text-decoration:none;font-size:.9rem;margin-bottom:20px;transition:color .2s;}
 .back:hover{color:var(--accent)}
-h1{
-font-size:2rem;
-font-weight:800;
-margin-bottom:8px;
-letter-spacing:-.02em;
-}
-h1 span{
-background:var(--gradient);
--webkit-background-clip:text;
--webkit-text-fill-color:transparent;
-background-clip:text;
-}
-.url-display{
-color:var(--muted);
-font-size:.95rem;
-margin-bottom:24px;
-word-break:break-all;
-}
-.score-card{
-background:var(--panel);
-backdrop-filter:blur(20px);
-border:1px solid var(--line);
-border-radius:20px;
-padding:32px;
-margin-bottom:28px;
-text-align:center;
-animation:slideUp .5s ease .1s both;
-}
-.score-number{
-font-size:5rem;
-font-weight:800;
-line-height:1;
-margin-bottom:8px;
-background:var(--gradient);
--webkit-background-clip:text;
--webkit-text-fill-color:transparent;
-background-clip:text;
-}
-.score-label{
-font-size:1.1rem;
-color:var(--muted);
-margin-bottom:16px;
-}
-.progress-bar{
-height:8px;
-background:rgba(255,255,255,.1);
-border-radius:999px;
-overflow:hidden;
-max-width:400px;
-margin:0 auto;
-}
-.progress-fill{
-height:100%;
-background:var(--gradient);
-border-radius:999px;
-transition:width 1s ease;
-animation:progressGrow 1s ease;
-}
-@keyframes progressGrow{
-from{width:0}
-}
-.section-title{
-font-size:1.3rem;
-font-weight:700;
-margin-bottom:16px;
-display:flex;
-align-items:center;
-gap:10px;
-}
-.row{
-background:var(--panel);
-backdrop-filter:blur(20px);
-border:1px solid var(--line);
-border-radius:14px;
-padding:20px;
-margin-bottom:12px;
-transition:all .3s;
-animation:slideUp .5s ease both;
-}
-.row:hover{
-border-color:rgba(255,255,255,.15);
-transform:translateX(4px);
-}
-.row-header{
-display:flex;
-align-items:start;
-gap:12px;
-margin-bottom:8px;
-}
-.row-icon{
-font-size:1.5rem;
-flex-shrink:0;
-}
-.row-content{flex:1}
-.row-name{
-font-weight:700;
-font-size:1.05rem;
-margin-bottom:4px;
-}
-.row-detail{
-color:var(--muted);
-font-size:.92rem;
-word-break:break-word;
-}
-.row-fix{
-margin-top:12px;
-padding:12px 16px;
-background:rgba(74,222,128,.1);
-border-left:3px solid var(--accent);
-border-radius:8px;
-font-size:.9rem;
-color:var(--text);
-}
-.row-fail .row-fix{
-background:rgba(248,113,113,.1);
-border-left-color:var(--danger);
-}
-
-/* --- NEW CLEAN CTA LAYOUT --- */
-.cta{
-background:var(--panel);
-backdrop-filter:blur(20px);
-border:1px solid var(--line);
-border-radius:20px;
-padding:36px;
-margin-top:32px;
-text-align:center;
-animation:slideUp .5s ease .3s both;
-}
-.cta h2{
-font-size:1.5rem;
-font-weight:700;
-margin-bottom:12px;
-}
-.cta p{
-color:var(--muted);
-margin-bottom:24px;
-}
-.cta-actions{
-display:flex;
-flex-direction:column;
-align-items:center;
-gap:24px;
-}
-.cta-buttons{
-display:flex;
-gap:16px;
-flex-wrap:wrap;
-justify-content:center;
-}
-.cta-btn{
-display:inline-flex;
-align-items:center;
-gap:8px;
-padding:14px 28px;
-border-radius:12px;
-font-weight:700;
-font-size:1rem;
-text-decoration:none;
-transition:all .3s;
-}
-.cta-btn-primary{
-background:var(--gradient);
-color:#0a0e27;
-box-shadow:0 4px 16px rgba(74,222,128,.25);
-}
-.cta-btn-primary:hover{
-transform:translateY(-2px);
-box-shadow:0 8px 24px rgba(74,222,128,.4);
-}
-.cta-btn-secondary{
-background:rgba(255,255,255,0.05);
-color:var(--text);
-border:1px solid var(--line);
-box-shadow:none;
-}
-.cta-btn-secondary:hover{
-background:rgba(255,255,255,0.1);
-border-color:var(--accent);
-transform:translateY(-2px);
-}
-.cta-links{
-display:flex;
-gap:24px;
-justify-content:center;
-flex-wrap:wrap;
-align-items:center;
-padding-top:24px;
-border-top:1px solid var(--line);
-width:100%;
-}
-.cta-links a{
-color:var(--muted);
-text-decoration:none;
-font-weight:500;
-font-size:0.95rem;
-transition:color .2s;
-cursor:pointer;
-}
-.cta-links a:hover{
-color:var(--accent);
-}
-/* --------------------------- */
-
-.toast{
-position:fixed;
-bottom:30px;
-left:50%;
-transform:translateX(-50%) translateY(100px);
-background:var(--gradient);
-color:#0a0e27;
-padding:14px 28px;
-border-radius:12px;
-font-weight:700;
-font-size:.95rem;
-box-shadow:0 8px 32px rgba(74,222,128,.4);
-transition:transform .3s ease;
-z-index:9999;
-}
-.toast.show{
-transform:translateX(-50%) translateY(0);
-}
-@keyframes spin{
-to{transform:rotate(360deg)}
-}
-@media(max-width:640px){
-.score-number{font-size:4rem}
-.row{padding:16px}
-.cta-buttons{flex-direction:column; width:100%;}
-.cta-btn{width:100%; justify-content:center;}
-}
+h1{font-size:2rem;font-weight:800;margin-bottom:8px;letter-spacing:-.02em;}
+h1 span{background:var(--gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.url-display{color:var(--muted);font-size:.95rem;margin-bottom:24px;word-break:break-all;}
+.score-card{background:var(--panel);backdrop-filter:blur(20px);border:1px solid var(--line);border-radius:20px;padding:32px;margin-bottom:28px;text-align:center;animation:slideUp .5s ease .1s both;}
+.score-number{font-size:5rem;font-weight:800;line-height:1;margin-bottom:8px;background:var(--gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.score-label{font-size:1.1rem;color:var(--muted);margin-bottom:16px;}
+.progress-bar{height:8px;background:rgba(255,255,255,.1);border-radius:999px;overflow:hidden;max-width:400px;margin:0 auto;}
+.progress-fill{height:100%;background:var(--gradient);border-radius:999px;transition:width 1s ease;animation:progressGrow 1s ease;}
+@keyframes progressGrow{from{width:0}}
+.section-title{font-size:1.3rem;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:10px;}
+.row{background:var(--panel);backdrop-filter:blur(20px);border:1px solid var(--line);border-radius:14px;padding:20px;margin-bottom:12px;transition:all .3s;animation:slideUp .5s ease both;}
+.row:hover{border-color:rgba(255,255,255,.15);transform:translateX(4px);}
+.row-header{display:flex;align-items:start;gap:12px;margin-bottom:8px;}
+.row-icon{font-size:1.5rem;flex-shrink:0;}
+.row-content{flex:1;}
+.row-name{font-weight:700;font-size:1.05rem;margin-bottom:4px;}
+.row-detail{color:var(--muted);font-size:.92rem;word-break:break-word;}
+.row-fix{margin-top:12px;padding:12px 16px;background:rgba(74,222,128,.1);border-left:3px solid var(--accent);border-radius:8px;font-size:.9rem;color:var(--text);}
+.row-fail .row-fix{background:rgba(248,113,113,.1);border-left-color:var(--danger);}
+.cta{background:var(--panel);backdrop-filter:blur(20px);border:1px solid var(--line);border-radius:20px;padding:36px;margin-top:32px;text-align:center;animation:slideUp .5s ease .3s both;}
+.cta h2{font-size:1.5rem;font-weight:700;margin-bottom:12px;}
+.cta p{color:var(--muted);margin-bottom:24px;}
+.cta-actions{display:flex;flex-direction:column;align-items:center;gap:24px;}
+.cta-buttons{display:flex;gap:16px;flex-wrap:wrap;justify-content:center;}
+.cta-btn{display:inline-flex;align-items:center;gap:8px;padding:14px 28px;border-radius:12px;font-weight:700;font-size:1rem;text-decoration:none;transition:all .3s;}
+.cta-btn-primary{background:var(--gradient);color:#0a0e27;box-shadow:0 4px 16px rgba(74,222,128,.25);}
+.cta-btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(74,222,128,.4);}
+.cta-btn-secondary{background:rgba(255,255,255,0.05);color:var(--text);border:1px solid var(--line);box-shadow:none;}
+.cta-btn-secondary:hover{background:rgba(255,255,255,0.1);border-color:var(--accent);transform:translateY(-2px);}
+.cta-links{display:flex;gap:24px;justify-content:center;flex-wrap:wrap;align-items:center;padding-top:24px;border-top:1px solid var(--line);width:100%;}
+.cta-links a{color:var(--muted);text-decoration:none;font-weight:500;font-size:0.95rem;transition:color .2s;cursor:pointer;}
+.cta-links a:hover{color:var(--accent);}
+.toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--gradient);color:#0a0e27;padding:14px 28px;border-radius:12px;font-weight:700;font-size:.95rem;box-shadow:0 8px 32px rgba(74,222,128,.4);transition:transform .3s ease;z-index:9999;}
+.toast.show{transform:translateX(-50%) translateY(0);}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media(max-width:640px){.score-number{font-size:4rem}.row{padding:16px}.cta-buttons{flex-direction:column;width:100%}.cta-btn{width:100%;justify-content:center;}}
 """
 
 def audit(url):
@@ -603,58 +163,34 @@ def audit(url):
         load = round(time.time() - t0, 2)
         final_url = r.url
         soup = BeautifulSoup(r.text, "html.parser")
-        checks.append(("Page Load Speed", load <= 3, f"{load}s",
-                       "Compress images, enable caching, use a CDN.",
-                       "⚡"))
-        checks.append(("HTTPS / SSL Security", final_url.startswith("https"),
-                       "Secure" if final_url.startswith("https") else "NOT secure",
-                       "Install a free SSL certificate (Let's Encrypt / Cloudflare).",
-                       "🔒"))
+        checks.append(("Page Load Speed", load <= 3, f"{load}s", "Compress images, enable caching, use a CDN.", "⚡"))
+        checks.append(("HTTPS / SSL Security", final_url.startswith("https"), "Secure" if final_url.startswith("https") else "NOT secure", "Install a free SSL certificate (Let's Encrypt / Cloudflare).", "🔒"))
         vp = soup.find("meta", attrs={"name": "viewport"}) is not None
-        checks.append(("Mobile Friendly", vp,
-                       "Viewport set" if vp else "No viewport tag",
-                       "Add mobile viewport meta tag + responsive theme.",
-                       "📱"))
+        checks.append(("Mobile Friendly", vp, "Viewport set" if vp else "No viewport tag", "Add mobile viewport meta tag + responsive theme.", "📱"))
         title = soup.title.string.strip() if soup.title and soup.title.string else ""
-        checks.append(("Page Title (SEO)", len(title) >= 10,
-                       title or "Missing",
-                       "Write a 30-60 character title with your main keyword.",
-                       "🏷️"))
+        checks.append(("Page Title (SEO)", len(title) >= 10, title or "Missing", "Write a 30-60 character title with your main keyword.", "🏷️"))
         m = soup.find("meta", attrs={"name": "description"})
         desc = m.get("content", "") if m and m.get("content") else ""
-        checks.append(("Meta Description (SEO)", len(desc) >= 50,
-                       (desc[:60] + "...") if desc else "Missing",
-                       "Add a 120-160 char description - this is what Google shows.",
-                       "📝"))
+        checks.append(("Meta Description (SEO)", len(desc) >= 50, (desc[:60] + "...") if desc else "Missing", "Add a 120-160 char description - this is what Google shows.", "📝"))
         h1 = soup.find("h1")
-        checks.append(("H1 Heading", h1 is not None,
-                       h1.get_text(strip=True)[:60] if h1 else "Missing",
-                       "Use exactly one H1 that states what the page is about.",
-                       "📋"))
+        checks.append(("H1 Heading", h1 is not None, h1.get_text(strip=True)[:60] if h1 else "Missing", "Use exactly one H1 that states what the page is about.", "📋"))
         imgs = soup.find_all("img")
         no_alt = [i for i in imgs if not i.get("alt")]
-        checks.append(("Image Alt Tags", len(no_alt) == 0,
-                       f"{len(no_alt)}/{len(imgs)} images missing alt",
-                       "Add alt text to every image (SEO + accessibility).",
-                       "🖼️"))
+        checks.append(("Image Alt Tags", len(no_alt) == 0, f"{len(no_alt)}/{len(imgs)} images missing alt", "Add alt text to every image (SEO + accessibility).", "🖼️"))
         kb = round(len(r.content) / 1024)
-        checks.append(("Page Weight", kb <= 1500, f"{kb} KB",
-                       "Compress images & remove unused scripts.",
-                       "📦"))
+        checks.append(("Page Weight", kb <= 1500, f"{kb} KB", "Compress images & remove unused scripts.", "📦"))
         return checks, None
     except Exception as e:
         return None, str(e)
 
 def _pdf_text(value):
     text = str(value)
-    fancy = {
-        "\u2013": "-", "\u2014": "-", "\u2015": "-",
-        "\u2018": "'", "\u2019": "'",
-        "\u201c": '"', "\u201d": '"',
-        "\u2026": "...", "\u00a0": " ", "\u20b9": "Rs ",
-    }
+    fancy = {"\u2013": "-", "\u2014": "-", "\u2015": "-", "\u2018": "'", "\u2019": "'", "\u201c": '"', "\u201d": '"', "\u2026": "...", "\u00a0": " ", "\u20b9": "Rs "}
     for old, new in fancy.items():
         text = text.replace(old, new)
+    # Remove emojis for PDF compatibility
+    import re
+    text = re.sub(r'[^\x00-\x7F]+', '', text)
     return text.encode("latin-1", "replace").decode("latin-1")
 
 def report_html(u, checks):
@@ -680,7 +216,7 @@ def report_html(u, checks):
     return f"""<!DOCTYPE html>
 <html><head><meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="SiteCheck is a free automated website health auditor. Get instant PDF reports covering SEO, speed, security, and mobile-friendliness for any website.">
+<meta name="description" content="SiteCheck is a free automated website health auditor.">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <title>SiteCheck Report</title><style>{CSS}</style></head>
 <body><div class="wrap">
@@ -690,9 +226,7 @@ def report_html(u, checks):
 <div class="score-card">
 <div class="score-number">{score}</div>
 <div class="score-label">Health Score</div>
-<div class="progress-bar">
-<div class="progress-fill" style="width:{score}%"></div>
-</div>
+<div class="progress-bar"><div class="progress-fill" style="width:{score}%"></div></div>
 </div>
 <div class="section-title">📊 Detailed Analysis</div>
 {rows}
@@ -760,6 +294,9 @@ def check():
         return error_html(err)
     return report_html(u, checks)
 
+# ==========================================================
+# 🚀 NEW PROFESSIONAL PDF GENERATION ENGINE
+# ==========================================================
 @app.route("/download-pdf")
 def download_pdf():
     url = request.args.get("site", "").strip()
@@ -774,98 +311,120 @@ def download_pdf():
     passed = sum(1 for c in checks if c[1])
     score = round(passed / len(checks) * 100) if checks else 0
 
+    # Custom PDF Class for Professional Branding
+    class AuditPDF(FPDF):
+        def header(self):
+            # Brand Name
+            self.set_font('Helvetica', 'B', 18)
+            self.set_text_color(34, 211, 238)  # Cyan brand color
+            self.cell(0, 10, 'NIKHILBUILDS', 0, 0, 'L')
+            
+            # Report Title
+            self.set_font('Helvetica', '', 10)
+            self.set_text_color(150, 150, 150)
+            self.cell(0, 10, 'Website Health Audit Report', 0, 1, 'R')
+            
+            # Divider Line
+            self.set_y(25)
+            self.set_draw_color(220, 220, 220)
+            self.set_line_width(0.5)
+            self.line(10, 25, 200, 25)
+            self.ln(15)
+
+        def footer(self):
+            self.set_y(-15)
+            self.set_font('Helvetica', 'I', 8)
+            self.set_text_color(150, 150, 150)
+            self.cell(0, 10, 'Generated by NikhilBuilds | hello@nikhilbuilds.com | nikhilbuilds.com', 0, 0, 'C')
+            self.set_x(190)
+            self.cell(0, 10, f'Page {self.page_no()}', 0, 0, 'R')
+
     try:
-        pdf = FPDF()
+        pdf = AuditPDF()
         pdf.add_page()
         pdf.set_auto_page_break(auto=True, margin=15)
-
-        left = pdf.l_margin
-        full = pdf.w - pdf.l_margin - pdf.r_margin
-
-        # Header
-        pdf.set_x(left)
-        pdf.set_font("Helvetica", "B", 22)
-        pdf.set_text_color(20, 120, 80)
-        pdf.cell(full, 12, "SiteCheck Health Report", align="C")
-        pdf.ln(12)
-
-        pdf.set_x(left)
-        pdf.set_font("Helvetica", "", 11)
-        pdf.set_text_color(110, 110, 110)
-        pdf.cell(full, 8, _pdf_text("Generated for: " + u), align="C")
-        pdf.ln(8)
-        pdf.ln(4)
-
-        # Score
-        if score >= 70:
-            color = (20, 130, 80)
-        elif score >= 40:
-            color = (190, 130, 20)
-        else:
-            color = (200, 60, 60)
-        pdf.set_x(left)
-        pdf.set_font("Helvetica", "B", 18)
-        pdf.set_text_color(*color)
-        pdf.cell(full, 12, "Overall Health Score: " + str(score) + "/100", align="C")
-        pdf.ln(12)
-        pdf.ln(4)
-
-        # Details
-        pdf.set_x(left)
-        pdf.set_font("Helvetica", "B", 14)
-        pdf.set_text_color(0, 0, 0)
-        pdf.cell(full, 10, "Detailed Analysis & Fixes")
+        
+        # 1. Metadata
+        pdf.set_font('Helvetica', 'B', 11)
+        pdf.set_text_color(60, 60, 60)
+        pdf.cell(0, 8, f"Target Website: {u}", 0, 1)
+        pdf.set_font('Helvetica', '', 10)
+        pdf.set_text_color(120, 120, 120)
+        pdf.cell(0, 8, f"Scan Date: {datetime.now().strftime('%B %d, %Y')}", 0, 1)
         pdf.ln(10)
-        pdf.ln(2)
 
+        # 2. Color-Coded Score Box
+        score_color = (34, 197, 94) if score >= 70 else (234, 179, 8) if score >= 40 else (239, 68, 68)
+        
+        pdf.set_fill_color(245, 245, 245)
+        pdf.rect(10, pdf.get_y(), 190, 35, 'F')  # x, y, w, h
+        
+        pdf.set_font('Helvetica', 'B', 10)
+        pdf.set_text_color(100, 100, 100)
+        pdf.set_xy(10, pdf.get_y() + 5)
+        pdf.cell(190, 8, "OVERALL HEALTH SCORE", 0, 1, 'C')
+        
+        pdf.set_font('Helvetica', 'B', 32)
+        pdf.set_text_color(*score_color)
+        pdf.cell(190, 20, f"{score} / 100", 0, 1, 'C')
+        pdf.ln(15)
+
+        # 3. Findings Header
+        pdf.set_font('Helvetica', 'B', 14)
+        pdf.set_text_color(30, 30, 30)
+        pdf.cell(0, 10, "Detailed Findings & Recommendations", 0, 1)
+        pdf.set_draw_color(34, 211, 238)
+        pdf.set_line_width(0.8)
+        pdf.line(10, pdf.get_y(), 75, pdf.get_y())  # Short stylish underline
+        pdf.ln(5)
+
+        # 4. Checks Loop
         for name, ok, detail, fix, icon in checks:
             status = "PASS" if ok else "FAIL"
-
-            pdf.set_x(left)
-            pdf.set_font("Helvetica", "B", 12)
-            if ok:
-                pdf.set_text_color(20, 130, 80)
-            else:
-                pdf.set_text_color(200, 60, 60)
-            pdf.cell(18, 8, "[" + status + "]")
-            pdf.set_text_color(0, 0, 0)
-            pdf.cell(full - 18, 8, _pdf_text(name))
-            pdf.ln(8)
-
-            pdf.set_x(left)
-            pdf.set_font("Helvetica", "", 10)
-            pdf.set_text_color(90, 90, 90)
-            pdf.multi_cell(full, 5, _pdf_text("Status: " + str(detail)))
-
+            status_color = (34, 197, 94) if ok else (239, 68, 68)
+            
+            # Status Badge
+            pdf.set_font('Helvetica', 'B', 10)
+            pdf.set_text_color(*status_color)
+            pdf.cell(30, 8, f"[ {status} ]", 0, 0)
+            
+            # Check Name
+            pdf.set_text_color(30, 30, 30)
+            pdf.cell(0, 8, name, 0, 1)
+            
+            # Detail
+            pdf.set_font('Helvetica', '', 10)
+            pdf.set_text_color(100, 100, 100)
+            clean_detail = _pdf_text(str(detail)).strip()
+            pdf.multi_cell(0, 6, f"Status: {clean_detail}")
+            
+            # Fix (if failed)
             if not ok:
-                pdf.set_x(left)
-                pdf.set_text_color(40, 60, 180)
-                pdf.multi_cell(full, 5, _pdf_text("Fix: " + str(fix)))
+                pdf.set_font('Helvetica', 'I', 9)
+                pdf.set_text_color(180, 40, 40)  # Dark red for attention
+                clean_fix = _pdf_text(str(fix)).strip()
+                pdf.multi_cell(0, 6, f"Recommendation: {clean_fix}")
+                
+            pdf.ln(4)
+            # Subtle divider between items
+            pdf.set_draw_color(230, 230, 230)
+            pdf.set_line_width(0.2)
+            pdf.line(10, pdf.get_y(), 200, pdf.get_y())
+            pdf.ln(4)
 
-            pdf.set_x(left)
-            pdf.ln(3)
-
-        # Footer CTA
-        pdf.set_x(left)
-        pdf.ln(4)
-        pdf.set_font("Helvetica", "B", 13)
+        # 5. Professional Call to Action (CTA) Box at the end
+        pdf.ln(10)
+        pdf.set_fill_color(34, 211, 238)  # Cyan background
+        pdf.rect(10, pdf.get_y(), 190, 25, 'F')
+        pdf.set_font('Helvetica', 'B', 12)
         pdf.set_text_color(0, 0, 0)
-        pdf.cell(full, 9, "Want these issues fixed?")
-        pdf.ln(9)
+        pdf.set_xy(10, pdf.get_y() + 6)
+        pdf.cell(190, 8, "Need help fixing these issues?", 0, 1, 'C')
+        pdf.set_font('Helvetica', '', 10)
+        pdf.cell(190, 8, "Contact us at hello@nikhilbuilds.com or visit nikhilbuilds.com", 0, 1, 'C')
 
-        pdf.set_x(left)
-        pdf.set_font("Helvetica", "", 11)
-        pdf.cell(full, 7, "Contact us to fix these problems for your business.")
-        pdf.ln(7)
-
-        pdf.set_x(left)
-        pdf.set_font("Helvetica", "B", 11)
-        pdf.set_text_color(20, 120, 80)
-        pdf.cell(full, 7, "Email: hello@nikhilbuilds.com")
-        pdf.ln(7)
-
+        # Generate and Send
         pdf_bytes = pdf.output()
-
         safe_filename = u.replace("https://", "").replace("http://", "").replace("/", "_").replace(":", "")
         if not safe_filename:
             safe_filename = "website"
@@ -874,7 +433,7 @@ def download_pdf():
             io.BytesIO(pdf_bytes),
             mimetype="application/pdf",
             as_attachment=True,
-            download_name="SiteCheck_" + safe_filename + ".pdf",
+            download_name=f"SiteCheck_Audit_{safe_filename}.pdf",
         )
     except Exception as e:
         return "PDF generation error: " + str(e), 500
