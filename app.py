@@ -273,7 +273,7 @@ def report_html(u, checks):
 </div>
 </div>"""
     safe_u = urllib.parse.quote(u)
-    return f"""<div class="wrap">
+    return f"""<style>{CSS}</style><div class="wrap">
 <a class="back" onclick="goBack()">← Scan another website</a>
 <h1> Site<span>Check</span> Report</h1>
 <div class="url-display">Scanned: {u}</div>
