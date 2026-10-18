@@ -1,4 +1,4 @@
-from flask import Flask, request, send_file, make_response
+from flask import Flask, request, send_file
 import requests as req
 import time
 import io
@@ -10,7 +10,7 @@ from datetime import datetime
 
 app = Flask(__name__)
 
-# Prevent browser caching (Fixes stale results on back button)
+# Prevent caching
 @app.after_request
 def add_header(response):
     response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
@@ -25,9 +25,10 @@ LANDING = """<!DOCTYPE html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="SiteCheck is a free automated website health auditor.">
-<title>SiteCheck — Free Website Health Report</title>
+<meta name="description" content="SiteCheck is a free automated website health auditor. Get instant PDF reports covering SEO, speed, security, and mobile-friendliness for any website.">
+<title>SiteCheck — Free Website Health Report by Nikhil</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -47,6 +48,8 @@ form{display:flex;gap:12px;margin-bottom:28px;}
 input{flex:1;padding:16px 20px;border-radius:12px;border:1px solid var(--line);background:rgba(255,255,255,.05);color:var(--text);font-size:1rem;transition:all .3s;}
 input:focus{outline:none;border-color:var(--accent);background:rgba(255,255,255,.08);box-shadow:0 0 0 3px rgba(74,222,128,.1);}
 button{padding:16px 28px;border-radius:12px;border:none;background:var(--gradient);color:#0a0e27;font-weight:700;font-size:1rem;cursor:pointer;transition:all .3s;position:relative;overflow:hidden;}
+button::before{content:'';position:absolute;top:50%;left:50%;width:0;height:0;border-radius:50%;background:rgba(255,255,255,.3);transform:translate(-50%,-50%);transition:width .6s,height .6s;}
+button:hover::before{width:300px;height:300px;}
 button:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(74,222,128,.3);}
 button:disabled{opacity:.6;cursor:not-allowed;}
 .features{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:28px;}
@@ -66,10 +69,9 @@ footer a:hover{color:var(--accent2);}
 </style>
 </head>
 <body>
-
 <div class="container" id="landingPage">
 <div class="box">
-<div class="logo">🩺 Free Tool</div>
+<div class="logo"> Free Tool</div>
 <h1>Website Health <span>Check</span></h1>
 <p class="sub">Get an instant professional audit of any website — speed, mobile, SEO & security issues revealed in seconds.</p>
 <form id="checkForm">
@@ -94,7 +96,6 @@ footer a:hover{color:var(--accent2);}
 <div id="resultContainer" class="hidden"></div>
 
 <div class="toast" id="toast">✓ Email copied to clipboard!</div>
-
 <script>
 function copyEmail(e) {
     if(e) e.preventDefault();
@@ -110,11 +111,9 @@ function goBack() {
     document.getElementById('landingPage').classList.remove('hidden');
     document.getElementById('resultContainer').classList.add('hidden');
     document.getElementById('resultContainer').innerHTML = '';
-    
     const btn = document.getElementById('submitBtn');
     btn.innerHTML = 'Scan Website';
     btn.disabled = false;
-    
     window.history.pushState({}, '', '/');
 }
 
@@ -130,7 +129,7 @@ document.getElementById('checkForm').addEventListener('submit', async function(e
     btn.disabled = true;
 
     try {
-        const response = await fetch('/api/check', {
+        const response = await fetch('/result', {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
             body: 'url=' + encodeURIComponent(url)
@@ -142,7 +141,7 @@ document.getElementById('checkForm').addEventListener('submit', async function(e
         document.getElementById('resultContainer').innerHTML = html;
         document.getElementById('resultContainer').classList.remove('hidden');
         
-        window.history.pushState({}, '', '/');
+        window.history.pushState({}, '', '/result');
         
     } catch (error) {
         alert('Something went wrong. Please try again.');
@@ -155,7 +154,6 @@ window.addEventListener('popstate', function() {
     document.getElementById('landingPage').classList.remove('hidden');
     document.getElementById('resultContainer').classList.add('hidden');
     document.getElementById('resultContainer').innerHTML = '';
-    
     const btn = document.getElementById('submitBtn');
     btn.innerHTML = 'Scan Website';
     btn.disabled = false;
@@ -221,7 +219,7 @@ def audit(url):
         final_url = r.url
         soup = BeautifulSoup(r.text, "html.parser")
         checks.append(("Page Load Speed", load <= 3, f"{load}s", "Compress images, enable caching, use a CDN.", "⚡"))
-        checks.append(("HTTPS / SSL Security", final_url.startswith("https"), "Secure" if final_url.startswith("https") else "NOT secure", "Install a free SSL certificate (Let's Encrypt / Cloudflare).", "🔒"))
+        checks.append(("HTTPS / SSL Security", final_url.startswith("https"), "Secure" if final_url.startswith("https") else "NOT secure", "Install a free SSL certificate (Let's Encrypt / Cloudflare).", ""))
         vp = soup.find("meta", attrs={"name": "viewport"}) is not None
         checks.append(("Mobile Friendly", vp, "Viewport set" if vp else "No viewport tag", "Add mobile viewport meta tag + responsive theme.", "📱"))
         title = soup.title.string.strip() if soup.title and soup.title.string else ""
@@ -235,7 +233,7 @@ def audit(url):
         no_alt = [i for i in imgs if not i.get("alt")]
         checks.append(("Image Alt Tags", len(no_alt) == 0, f"{len(no_alt)}/{len(imgs)} images missing alt", "Add alt text to every image (SEO + accessibility).", "🖼️"))
         kb = round(len(r.content) / 1024)
-        checks.append(("Page Weight", kb <= 1500, f"{kb} KB", "Compress images & remove unused scripts.", "📦"))
+        checks.append(("Page Weight", kb <= 1500, f"{kb} KB", "Compress images & remove unused scripts.", ""))
         return checks, None
     except Exception as e:
         return None, str(e)
@@ -254,7 +252,7 @@ def report_html(u, checks):
     rows = ""
     for i, (name, ok, detail, fix, icon) in enumerate(checks):
         status_class = "" if ok else "row-fail"
-        status_icon = "✅" if ok else "❌"
+        status_icon = "✅" if ok else ""
         fix_html = f'<div class="row-fix">🔧 <strong>Fix:</strong> {fix}</div>' if not ok else ""
         rows += f"""
 <div class="row {status_class}" style="animation-delay:{.15+i*.05}s">
@@ -270,14 +268,14 @@ def report_html(u, checks):
     safe_u = urllib.parse.quote(u)
     return f"""<div class="wrap">
 <a class="back" onclick="goBack()">← Scan another website</a>
-<h1> Site<span>Check</span> Report</h1>
+<h1>🩺 Site<span>Check</span> Report</h1>
 <div class="url-display">Scanned: {u}</div>
 <div class="score-card">
 <div class="score-number">{score}</div>
 <div class="score-label">Health Score</div>
 <div class="progress-bar"><div class="progress-fill" style="width:{score}%"></div></div>
 </div>
-<div class="section-title"> Detailed Analysis</div>
+<div class="section-title">📊 Detailed Analysis</div>
 {rows}
 <div class="cta">
 <h2>Want these issues fixed for you?</h2>
@@ -288,7 +286,7 @@ def report_html(u, checks):
         <a href="#" class="cta-btn cta-btn-secondary" onclick="copyEmail(event)">✉️ hello@nikhilbuilds.com</a>
     </div>
     <div class="cta-links">
-        <a href="https://nikhilbuilds.com" target="_blank">🌐 Portfolio</a>
+        <a href="https://nikhilbuilds.com" target="_blank"> Portfolio</a>
         <a href="https://github.com/imnick009" target="_blank">🐙 GitHub</a>
     </div>
 </div>
@@ -315,8 +313,8 @@ def error_html(msg):
 def home():
     return LANDING
 
-@app.route("/api/check", methods=["POST"])
-def check():
+@app.route("/result", methods=["POST"])
+def result():
     url = request.form.get("url", "").strip()
     if not url:
         return error_html("No URL provided.")
