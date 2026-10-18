@@ -322,15 +322,14 @@ def download_pdf():
             self.cell(0, 8, 'Website Health Audit Report', 0, 1, 'R')
             self.ln(10)
 
-        
-        def footer(self):
-            self.set_y(-15)
-            self.set_fill_color(34, 211, 238)
-            self.rect(0, self.get_y(), 210, 15, 'F')  # Full width rectangle
-            self.set_x(0)
-            self.set_font('Helvetica', 'I', 8)
-            self.set_text_color(255, 255, 255)
-            self.cell(210, 10, 'hello@nikhilbuilds.com | nikhilbuilds.com', 0, 0, 'C')  # Full width cell
+def footer(self):
+    self.set_y(-15)
+    self.set_fill_color(34, 211, 238)
+    self.rect(0, self.get_y(), 210, 15, 'F')
+    self.set_x(self.l_margin)  # Changed from set_x(0) to set_x(self.l_margin)
+    self.set_font('Helvetica', 'I', 8)
+    self.set_text_color(255, 255, 255)
+    self.cell(0, 10, 'hello@nikhilbuilds.com | nikhilbuilds.com', 0, 0, 'C')  # Changed 210 to 0
 
     try:
         pdf = AuditPDF()
