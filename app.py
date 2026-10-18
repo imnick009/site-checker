@@ -3,6 +3,7 @@ import requests as req
 import time
 import io
 import urllib.parse
+import re
 from bs4 import BeautifulSoup
 from fpdf import FPDF
 from datetime import datetime
@@ -10,10 +11,6 @@ from datetime import datetime
 app = Flask(__name__)
 
 UA = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
-
-# ... [LANDING and CSS variables remain exactly the same as your previous code] ...
-# (Main yahan space bachane ke liye skip kar raha hoon, tumhara purana LANDING aur CSS waisa hi rahega)
-# Bas niche wala hissa replace karna hai.
 
 LANDING = """<!DOCTYPE html>
 <html lang="en">
@@ -185,11 +182,15 @@ def audit(url):
 
 def _pdf_text(value):
     text = str(value)
-    fancy = {"\u2013": "-", "\u2014": "-", "\u2015": "-", "\u2018": "'", "\u2019": "'", "\u201c": '"', "\u201d": '"', "\u2026": "...", "\u00a0": " ", "\u20b9": "Rs "}
+    fancy = {
+        "\u2013": "-", "\u2014": "-", "\u2015": "-",
+        "\u2018": "'", "\u2019": "'",
+        "\u201c": '"', "\u201d": '"',
+        "\u2026": "...", "\u00a0": " ", "\u20b9": "Rs "
+    }
     for old, new in fancy.items():
         text = text.replace(old, new)
-    # Remove emojis for PDF compatibility
-    import re
+    # Remove emojis and non-ASCII characters for PDF compatibility
     text = re.sub(r'[^\x00-\x7F]+', '', text)
     return text.encode("latin-1", "replace").decode("latin-1")
 
@@ -295,7 +296,7 @@ def check():
     return report_html(u, checks)
 
 # ==========================================================
-# 🚀 NEW PROFESSIONAL PDF GENERATION ENGINE
+# 🚀 PROFESSIONAL PDF GENERATION ENGINE (FIXED)
 # ==========================================================
 @app.route("/download-pdf")
 def download_pdf():
@@ -311,27 +312,19 @@ def download_pdf():
     passed = sum(1 for c in checks if c[1])
     score = round(passed / len(checks) * 100) if checks else 0
 
-    # Custom PDF Class for Professional Branding
     class AuditPDF(FPDF):
         def header(self):
-            # Brand Name - Left
             self.set_font('Helvetica', 'B', 16)
-            self.set_text_color(34, 211, 238)  # Cyan brand color
+            self.set_text_color(34, 211, 238)
             self.cell(0, 10, 'NIKHILBUILDS', 0, 0, 'L')
-            
-            # Line break
             self.ln(5)
-            
-            # Report Title - Right
             self.set_font('Helvetica', '', 9)
             self.set_text_color(150, 150, 150)
             self.cell(0, 5, 'Website Health Audit Report', 0, 1, 'R')
-            
-            # Divider Line
             self.set_y(20)
             self.set_draw_color(220, 220, 220)
             self.set_line_width(0.5)
-            self.line(10, 20, 200, 20)
+            self.line(15, 20, 195, 20)
             self.ln(10)
 
         def footer(self):
@@ -343,7 +336,7 @@ def download_pdf():
     try:
         pdf = AuditPDF()
         pdf.add_page()
-        pdf.set_margins(15, 35, 15)  # Left, Top, Right margins
+        pdf.set_margins(15, 35, 15)
         pdf.set_auto_page_break(auto=True, margin=20)
         
         # 1. Metadata
@@ -358,25 +351,21 @@ def download_pdf():
         # 2. Color-Coded Score Box
         score_color = (34, 197, 94) if score >= 70 else (234, 179, 8) if score >= 40 else (239, 68, 68)
         
-        # Draw box background
-        pdf.set_fill_color(245, 245, 245)
         box_start_y = pdf.get_y()
-        pdf.rect(15, box_start_y, 180, 30, 'F')  # x, y, w, h
+        pdf.set_fill_color(245, 245, 245)
+        pdf.rect(15, box_start_y, 180, 35, 'F')
         
-        # Score Label
         pdf.set_font('Helvetica', 'B', 10)
         pdf.set_text_color(100, 100, 100)
-        pdf.set_xy(15, box_start_y + 5)
-        pdf.cell(180, 8, "OVERALL HEALTH SCORE", 0, 1, 'C')
+        pdf.set_x(15)
+        pdf.cell(0, 8, "OVERALL HEALTH SCORE", 0, 1, 'C')  # Width 0 is safe!
         
-        # Score Number
         pdf.set_font('Helvetica', 'B', 28)
         pdf.set_text_color(*score_color)
-        pdf.cell(180, 15, f"{score} / 100", 0, 1, 'C')
+        pdf.set_x(15)
+        pdf.cell(0, 15, f"{score} / 100", 0, 1, 'C')  # Width 0 is safe!
         
-        # Move cursor below box
-        pdf.set_y(box_start_y + 35)
-        pdf.ln(5)
+        pdf.set_y(box_start_y + 40)
 
         # 3. Findings Header
         pdf.set_font('Helvetica', 'B', 13)
@@ -384,7 +373,8 @@ def download_pdf():
         pdf.cell(0, 10, "Detailed Findings & Recommendations", 0, 1)
         pdf.set_draw_color(34, 211, 238)
         pdf.set_line_width(0.8)
-        pdf.line(15, pdf.get_y(), 65, pdf.get_y())  # Short stylish underline
+        current_y = pdf.get_y()
+        pdf.line(15, current_y, 85, current_y)
         pdf.ln(3)
 
         # 4. Checks Loop
@@ -392,49 +382,44 @@ def download_pdf():
             status = "PASS" if ok else "FAIL"
             status_color = (34, 197, 94) if ok else (239, 68, 68)
             
-            # Status Badge
             pdf.set_font('Helvetica', 'B', 9)
             pdf.set_text_color(*status_color)
             pdf.cell(25, 7, f"[ {status} ]", 0, 0)
             
-            # Check Name
             pdf.set_text_color(30, 30, 30)
-            pdf.cell(0, 7, name, 0, 1)
+            pdf.cell(0, 7, name, 0, 1)  # Width 0 extends to right margin safely
             
-            # Detail
             pdf.set_font('Helvetica', '', 9)
             pdf.set_text_color(100, 100, 100)
             clean_detail = _pdf_text(str(detail)).strip()
-            pdf.multi_cell(0, 5, f"Status: {clean_detail}")
+            pdf.multi_cell(0, 5, f"Status: {clean_detail}")  # Width 0
             
-            # Fix (if failed)
             if not ok:
                 pdf.set_font('Helvetica', 'I', 9)
-                pdf.set_text_color(180, 40, 40)  # Dark red for attention
+                pdf.set_text_color(180, 40, 40)
                 clean_fix = _pdf_text(str(fix)).strip()
-                pdf.multi_cell(0, 5, f"Recommendation: {clean_fix}")
+                pdf.multi_cell(0, 5, f"Recommendation: {clean_fix}")  # Width 0
                 
             pdf.ln(3)
-            # Subtle divider between items
             pdf.set_draw_color(230, 230, 230)
             pdf.set_line_width(0.2)
             current_y = pdf.get_y()
             pdf.line(15, current_y, 195, current_y)
             pdf.ln(3)
 
-        # 5. Professional Call to Action (CTA) Box at the end
+        # 5. Professional Call to Action (CTA) Box
         pdf.ln(8)
         cta_y = pdf.get_y()
-        pdf.set_fill_color(34, 211, 238)  # Cyan background
-        pdf.rect(15, cta_y, 180, 22, 'F')
+        pdf.set_fill_color(34, 211, 238)
+        pdf.rect(15, cta_y, 180, 25, 'F')
         pdf.set_font('Helvetica', 'B', 11)
         pdf.set_text_color(0, 0, 0)
-        pdf.set_xy(15, cta_y + 5)
-        pdf.cell(180, 7, "Need help fixing these issues?", 0, 1, 'C')
+        pdf.set_x(15)
+        pdf.cell(0, 8, "Need help fixing these issues?", 0, 1, 'C')  # Width 0
         pdf.set_font('Helvetica', '', 9)
-        pdf.cell(180, 7, "hello@nikhilbuilds.com | nikhilbuilds.com", 0, 1, 'C')
+        pdf.set_x(15)
+        pdf.cell(0, 8, "hello@nikhilbuilds.com | nikhilbuilds.com", 0, 1, 'C')  # Width 0
 
-        # Generate and Send
         pdf_bytes = pdf.output()
         safe_filename = u.replace("https://", "").replace("http://", "").replace("/", "_").replace(":", "")
         if not safe_filename:
