@@ -415,7 +415,7 @@ def download_pdf():
         pdf.set_font('Helvetica', '', 12)
         pdf.set_text_color(0, 0, 0)
         pdf.set_x(15)
-        pdf.cell(0, 10, "hello@nikhilbuilds.com | nikhilbuilds.com", 0, 1, 'C')
+        pdf.cell(0, 10, "Contact me: hello@nikhilbuilds.com", 0, 1, 'C')
 
         pdf_bytes = pdf.output()
         safe_filename = u.replace("https://", "").replace("http://", "").replace("/", "_").replace(":", "")[:30]
