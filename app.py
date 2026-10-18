@@ -292,6 +292,32 @@ def report_html(u, checks):
         <a href="#" class="cta-btn cta-btn-secondary" onclick="copyEmail(event)">✉️ hello&#64;nikhilbuilds.com</a>
     </div>
     <div class="cta-links">
+        <a href="https://nikhilbuilds.com" target="_blank">🌐 NikhilBuilds.Com</a>
+        <a href="https://github.com/imnick009" target="_blank">🐙 GitHub</a>
+    </div>
+</div>
+</div>"""
+    safe_u = urllib.parse.quote(u)
+    return f"""<style>{CSS}</style><div class="wrap">
+<a class="back" onclick="goBack()">← Scan another website</a>
+<h1> Site<span>Check</span> Report</h1>
+<div class="url-display">Scanned: {u}</div>
+<div class="score-card">
+<div class="score-number">{score}</div>
+<div class="score-label">Health Score</div>
+<div class="progress-bar"><div class="progress-fill" style="width:{score}%"></div></div>
+</div>
+<div class="section-title"> Detailed Analysis</div>
+{rows}
+<div class="cta">
+<h2>Want these issues fixed for you?</h2>
+<p>I fix exactly these problems for businesses in 2-4 days, fixed price. No surprises.</p>
+<div class="cta-actions">
+    <div class="cta-buttons">
+        <a href="/download-pdf?site={safe_u}" target="_blank" class="cta-btn cta-btn-primary">📥 Download PDF Report</a>
+        <a href="#" class="cta-btn cta-btn-secondary" onclick="copyEmail(event)">✉️ hello&#64;nikhilbuilds.com</a>
+    </div>
+    <div class="cta-links">
         <a href="https://nikhilbuilds.com" target="_blank"> NikhilBuilds.Com</a>
         <a href="https://github.com/imnick009" target="_blank">🐙 GitHub</a>
     </div>
