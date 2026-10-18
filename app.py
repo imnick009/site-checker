@@ -378,7 +378,7 @@ def download_pdf():
             self.set_font('Helvetica', 'B', 13)  # Bada font (13pt)
             self.set_text_color(0, 0, 0)
             self.set_x(0)
-            self.cell(210, 8, "nikhilbuilds.com", 0, 1, 'C')  # Sirf website
+            self.cell(210, 8, "NikhilBuilds.Com", 0, 1, 'C')  # Sirf website
 
     try:
         pdf = AuditPDF()
