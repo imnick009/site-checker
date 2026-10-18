@@ -126,7 +126,7 @@ document.getElementById('checkForm').addEventListener('submit', async function(e
 
     if (!url) return;
 
-    btn.innerHTML = '<span style="display:inline-block;animation:spin 1s linear infinite;">⏳</span> Scanning...';
+    btn.innerHTML = '<span style="display:inline-block;animation:spin 1s linear infinite;"></span> Scanning...';
     btn.disabled = true;
 
     try {
@@ -275,14 +275,14 @@ def report_html(u, checks):
     safe_u = urllib.parse.quote(u)
     return f"""<style>{CSS}</style><div class="wrap">
 <a class="back" onclick="goBack()">← Scan another website</a>
-<h1>🩺 Site<span>Check</span> Report</h1>
+<h1> Site<span>Check</span> Report</h1>
 <div class="url-display">Scanned: {u}</div>
 <div class="score-card">
 <div class="score-number">{score}</div>
 <div class="score-label">Health Score</div>
 <div class="progress-bar"><div class="progress-fill" style="width:{score}%"></div></div>
 </div>
-<div class="section-title">📊 Detailed Analysis</div>
+<div class="section-title"> Detailed Analysis</div>
 {rows}
 <div class="cta">
 <h2>Want these issues fixed for you?</h2>
@@ -293,7 +293,7 @@ def report_html(u, checks):
         <a href="#" class="cta-btn cta-btn-secondary" onclick="copyEmail(event)">✉️ hello&#64;nikhilbuilds.com</a>
     </div>
     <div class="cta-links">
-        <a href="https://nikhilbuilds.com" target="_blank">🌐 Portfolio</a>
+        <a href="https://nikhilbuilds.com" target="_blank"> Portfolio</a>
         <a href="https://github.com/imnick009" target="_blank">🐙 GitHub</a>
     </div>
 </div>
@@ -302,10 +302,10 @@ def report_html(u, checks):
 def error_html(msg):
     return f"""<style>{CSS}</style><div class="wrap">
 <a class="back" onclick="goBack()">← Try again</a>
-<h1>🩺 Site<span>Check</span></h1>
+<h1> Site<span>Check</span></h1>
 <div class="row row-fail">
 <div class="row-header">
-<div class="row-icon">❌</div>
+<div class="row-icon"></div>
 <div class="row-content">
 <div class="row-name">Could not scan this website</div>
 <div class="row-detail">{msg}</div>
@@ -347,37 +347,38 @@ def download_pdf():
     class AuditPDF(FPDF):
         def header(self):
             self.set_fill_color(34, 211, 238)
-            self.rect(0, 0, 210, 25, 'F')
+            self.rect(0, 0, 210, 28, 'F')  # Height 25 se 28 ki (badi)
             self.set_y(5)
             self.set_x(15)
-            self.set_font('Helvetica', 'B', 18)
+            self.set_font('Helvetica', 'B', 20)  # Size 18 se 20 ki (badi)
             self.set_text_color(255, 255, 255)
-            self.cell(0, 8, 'NikhilBuilds.Com', 0, 1, 'L')  # Changed to .Com
+            self.cell(0, 9, 'NikhilBuilds.Com', 0, 1, 'L')  # Line height 8 se 9
             self.set_x(15)
-            self.set_font('Helvetica', '', 9)
-            self.cell(0, 6, 'Website Health Audit Report', 0, 1, 'R')
+            self.set_font('Helvetica', '', 10)  # Size 9 se 10 ki
+            self.cell(0, 7, 'Website Health Audit Report', 0, 1, 'R')  # Line height 6 se 7
             self.ln(8)
 
         def footer(self):
-            # Footer at absolute bottom
-            self.set_y(-35)  # 35mm from bottom
+            # Footer at absolute bottom - compact
+            self.set_y(-30)  # 30mm from bottom (height kam)
             self.set_fill_color(34, 211, 238)
-            self.rect(0, self.get_y(), 210, 35, 'F')
+            self.rect(0, self.get_y(), 210, 30, 'F')  # Height 35 se 30 ki
             
             self.set_font('Helvetica', 'B', 12)
             self.set_text_color(0, 0, 0)
             self.set_x(0)
-            self.cell(210, 10, "Need help fixing these issues?", 0, 1, 'C')
+            self.cell(210, 9, "Need help fixing these issues?", 0, 1, 'C')  # Height 10 se 9
             
             self.set_font('Helvetica', '', 11)
             self.set_text_color(0, 0, 0)
             self.set_x(0)
-            self.cell(210, 9, "Contact me: hello@nikhilbuilds.com", 0, 1, 'C')
+            self.cell(210, 8, "Contact me: hello@nikhilbuilds.com", 0, 1, 'C')  # Height 9 se 8
             
-            self.set_font('Helvetica', 'I', 8)
-            self.set_text_color(50, 50, 50)
+            # Sirf website, bada aur clear - duplicate email hata diya
+            self.set_font('Helvetica', 'B', 13)  # Bada font (13pt)
+            self.set_text_color(0, 0, 0)
             self.set_x(0)
-            self.cell(210, 8, "hello@nikhilbuilds.com | nikhilbuilds.com", 0, 1, 'C')
+            self.cell(210, 8, "nikhilbuilds.com", 0, 1, 'C')  # Sirf website
 
     try:
         pdf = AuditPDF()
@@ -446,7 +447,6 @@ def download_pdf():
             
             pdf.ln(3)
 
-        # No manual footer box needed - footer() method handle karega
         pdf_bytes = pdf.output()
         safe_filename = u.replace("https://", "").replace("http://", "").replace("/", "_").replace(":", "")[:30]
         
