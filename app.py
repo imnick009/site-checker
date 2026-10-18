@@ -10,7 +10,7 @@ app = Flask(__name__)
 
 UA = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
 
-LANDING="""<!DOCTYPE html>
+LANDING = """<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -202,6 +202,7 @@ display:flex;
 gap:20px;
 flex-wrap:wrap;
 align-items:center;
+justify-content: center;
 }
 footer a{
 color:var(--accent);
@@ -304,7 +305,7 @@ btn.style.opacity = '.7';
 </body>
 </html>"""
 
-CSS="""
+CSS = """
 *{margin:0;padding:0;box-sizing:border-box}
 :root{
 --bg:#0a0e27;
@@ -478,6 +479,8 @@ color:var(--text);
 background:rgba(248,113,113,.1);
 border-left-color:var(--danger);
 }
+
+/* --- NEW CLEAN CTA LAYOUT --- */
 .cta{
 background:var(--panel);
 backdrop-filter:blur(20px);
@@ -495,41 +498,74 @@ margin-bottom:12px;
 }
 .cta p{
 color:var(--muted);
-margin-bottom:20px;
+margin-bottom:24px;
+}
+.cta-actions{
+display:flex;
+flex-direction:column;
+align-items:center;
+gap:24px;
+}
+.cta-buttons{
+display:flex;
+gap:16px;
+flex-wrap:wrap;
+justify-content:center;
+}
+.cta-btn{
+display:inline-flex;
+align-items:center;
+gap:8px;
+padding:14px 28px;
+border-radius:12px;
+font-weight:700;
+font-size:1rem;
+text-decoration:none;
+transition:all .3s;
+}
+.cta-btn-primary{
+background:var(--gradient);
+color:#0a0e27;
+box-shadow:0 4px 16px rgba(74,222,128,.25);
+}
+.cta-btn-primary:hover{
+transform:translateY(-2px);
+box-shadow:0 8px 24px rgba(74,222,128,.4);
+}
+.cta-btn-secondary{
+background:rgba(255,255,255,0.05);
+color:var(--text);
+border:1px solid var(--line);
+box-shadow:none;
+}
+.cta-btn-secondary:hover{
+background:rgba(255,255,255,0.1);
+border-color:var(--accent);
+transform:translateY(-2px);
 }
 .cta-links{
 display:flex;
-gap:16px;
+gap:24px;
 justify-content:center;
 flex-wrap:wrap;
 align-items:center;
+padding-top:24px;
+border-top:1px solid var(--line);
+width:100%;
 }
 .cta-links a{
-color:var(--accent);
+color:var(--muted);
 text-decoration:none;
-font-weight:600;
+font-weight:500;
+font-size:0.95rem;
 transition:color .2s;
 cursor:pointer;
 }
 .cta-links a:hover{
-color:var(--accent2);
+color:var(--accent);
 }
-.cta-links a.email-btn{
-display:inline-block;
-padding:14px 32px;
-border-radius:12px;
-background:var(--gradient);
-color:#0a0e27;
-font-weight:700;
-font-size:1rem;
-box-shadow:0 4px 16px rgba(74,222,128,.25);
-transition:all .3s;
-}
-.cta-links a.email-btn:hover{
-transform:translateY(-2px);
-box-shadow:0 8px 24px rgba(74,222,128,.4);
-color:#0a0e27;
-}
+/* --------------------------- */
+
 .toast{
 position:fixed;
 bottom:30px;
@@ -554,6 +590,8 @@ to{transform:rotate(360deg)}
 @media(max-width:640px){
 .score-number{font-size:4rem}
 .row{padding:16px}
+.cta-buttons{flex-direction:column; width:100%;}
+.cta-btn{width:100%; justify-content:center;}
 }
 """
 
@@ -632,7 +670,7 @@ def report_html(u, checks):
 <div class="row-header">
 <div class="row-icon">{icon}</div>
 <div class="row-content">
-<div class="row-name">{status_icon}{name}</div>
+<div class="row-name">{status_icon} {name}</div>
 <div class="row-detail">{detail}</div>
 {fix_html}
 </div>
@@ -661,11 +699,15 @@ def report_html(u, checks):
 <div class="cta">
 <h2>Want these issues fixed for you?</h2>
 <p>I fix exactly these problems for businesses in 2-4 days, fixed price. No surprises.</p>
-<div class="cta-links">
-<a href="/download-pdf?site={safe_u}" target="_blank" class="email-btn" style="background: linear-gradient(135deg, #60a5fa 0%, #4ade80 100%);">📥 Download PDF Report</a>
-<a href="#" class="email-btn" onclick="copyEmail(event)">hello@nikhilbuilds.com</a>
-<a href="https://nikhilbuilds.com" target="_blank">🌐 Portfolio</a>
-<a href="https://github.com/imnick009" target="_blank">🐙 GitHub</a>
+<div class="cta-actions">
+    <div class="cta-buttons">
+        <a href="/download-pdf?site={safe_u}" target="_blank" class="cta-btn cta-btn-primary">📥 Download PDF Report</a>
+        <a href="#" class="cta-btn cta-btn-secondary" onclick="copyEmail(event)">✉️ hello@nikhilbuilds.com</a>
+    </div>
+    <div class="cta-links">
+        <a href="https://nikhilbuilds.com" target="_blank">🌐 Portfolio</a>
+        <a href="https://github.com/imnick009" target="_blank">🐙 GitHub</a>
+    </div>
 </div>
 </div>
 <div class="toast" id="toast">✓ Email copied to clipboard!</div>
