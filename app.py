@@ -313,114 +313,127 @@ def download_pdf():
 
     class AuditPDF(FPDF):
         def header(self):
-            # Header with gradient-like effect
+            # Full-width cyan header bar
             self.set_fill_color(34, 211, 238)
-            self.rect(0, 0, 210, 25, 'F')
+            self.rect(0, 0, 210, 30, 'F')
             
-            self.set_y(5)
+            self.set_y(6)
             self.set_x(15)
-            self.set_font('Helvetica', 'B', 18)
+            self.set_font('Helvetica', 'B', 20)
             self.set_text_color(255, 255, 255)
-            self.cell(0, 8, 'NIKHILBUILDS', 0, 0, 'L')
+            self.cell(0, 10, 'NIKHILBUILDS', 0, 1, 'L')
             
             self.set_x(15)
-            self.set_y(15)
-            self.set_font('Helvetica', '', 9)
-            self.set_text_color(255, 255, 255)
-            self.cell(0, 6, 'Website Health Audit Report', 0, 1, 'R')
+            self.set_font('Helvetica', '', 10)
+            self.cell(0, 8, 'Website Health Audit Report', 0, 1, 'R')
             
-            self.ln(20)
+            self.ln(10)
 
         def footer(self):
-            self.set_y(-15)
+            self.set_y(-18)
             self.set_fill_color(34, 211, 238)
-            self.rect(0, self.get_y(), 210, 15, 'F')
+            self.rect(0, self.get_y(), 210, 18, 'F')
             self.set_x(0)
-            self.set_font('Helvetica', 'I', 8)
+            self.set_font('Helvetica', 'I', 9)
             self.set_text_color(255, 255, 255)
-            self.cell(0, 10, 'hello@nikhilbuilds.com | nikhilbuilds.com', 0, 0, 'C')
+            self.cell(0, 12, 'hello@nikhilbuilds.com | nikhilbuilds.com', 0, 0, 'C')
 
     try:
         pdf = AuditPDF()
         pdf.add_page()
-        pdf.set_margins(15, 30, 15)
-        pdf.set_auto_page_break(auto=False)  # Disable auto-break to keep it single page
+        pdf.set_margins(15, 35, 15)
+        pdf.set_auto_page_break(auto=True, margin=25)
         
-        # 1. Website Info & Score (Compact)
-        pdf.set_font('Helvetica', '', 9)
+        # 1. Website Info
+        pdf.set_font('Helvetica', '', 10)
         pdf.set_text_color(100, 100, 100)
-        pdf.cell(0, 5, f"Website: {u}", 0, 1)
-        pdf.cell(0, 5, f"Date: {datetime.now().strftime('%d %B %Y')}", 0, 1)
-        pdf.ln(3)
+        pdf.cell(0, 6, f"Website: {u}", 0, 1)
+        pdf.cell(0, 6, f"Audit Date: {datetime.now().strftime('%d %B %Y')}", 0, 1)
+        pdf.ln(5)
         
-        # Score Box - Compact & Color Matched
+        # 2. Score Box - Big & Prominent
         score_color = (34, 197, 94) if score >= 70 else (234, 179, 8) if score >= 40 else (239, 68, 68)
-        pdf.set_fill_color(240, 253, 250) if score >= 70 else pdf.set_fill_color(254, 252, 232) if score >= 40 else pdf.set_fill_color(254, 242, 242)
-        pdf.rect(15, pdf.get_y(), 180, 20, 'F')
+        box_bg = (240, 253, 250) if score >= 70 else (254, 252, 232) if score >= 40 else (254, 242, 242)
         
-        pdf.set_font('Helvetica', 'B', 10)
+        pdf.set_fill_color(*box_bg)
+        pdf.set_draw_color(34, 211, 238)
+        pdf.set_line_width(0.5)
+        pdf.rect(15, pdf.get_y(), 180, 28, 'DF')
+        
+        pdf.set_font('Helvetica', 'B', 11)
         pdf.set_text_color(100, 100, 100)
         pdf.set_x(15)
-        pdf.cell(0, 6, "OVERALL SCORE", 0, 1, 'C')
+        pdf.cell(0, 8, "OVERALL HEALTH SCORE", 0, 1, 'C')
         
-        pdf.set_font('Helvetica', 'B', 24)
+        pdf.set_font('Helvetica', 'B', 28)
         pdf.set_text_color(*score_color)
         pdf.set_x(15)
-        pdf.cell(0, 10, f"{score}/100", 0, 1, 'C')
+        pdf.cell(0, 14, f"{score} / 100", 0, 1, 'C')
         
         pdf.ln(8)
         
-        # 2. Section Title
-        pdf.set_font('Helvetica', 'B', 11)
+        # 3. Section Title
+        pdf.set_font('Helvetica', 'B', 14)
         pdf.set_text_color(34, 211, 238)
-        pdf.cell(0, 6, "DETAILED ANALYSIS", 0, 1)
+        pdf.cell(0, 8, "DETAILED ANALYSIS", 0, 1)
         pdf.set_draw_color(34, 211, 238)
-        pdf.set_line_width(0.5)
-        pdf.line(15, pdf.get_y(), 60, pdf.get_y())
-        pdf.ln(2)
+        pdf.set_line_width(0.8)
+        pdf.line(15, pdf.get_y(), 80, pdf.get_y())
+        pdf.ln(4)
         
-        # 3. Checks - Ultra Compact
+        # 4. Checks - Proper Spacing
         for name, ok, detail, fix, icon in checks:
             status = "PASS" if ok else "FAIL"
             status_color = (34, 197, 94) if ok else (239, 68, 68)
             
-            pdf.set_font('Helvetica', 'B', 8)
+            # Status Badge
+            pdf.set_font('Helvetica', 'B', 10)
             pdf.set_text_color(*status_color)
-            pdf.cell(20, 5, f"[{status}]", 0, 0)
+            pdf.cell(22, 7, f"[{status}]", 0, 0)
             
-            pdf.set_font('Helvetica', 'B', 9)
+            # Check Name
+            pdf.set_font('Helvetica', 'B', 11)
             pdf.set_text_color(30, 30, 30)
-            pdf.cell(0, 5, name, 0, 1)
+            pdf.cell(0, 7, name, 0, 1)
             
-            pdf.set_font('Helvetica', '', 8)
+            # Detail
+            pdf.set_font('Helvetica', '', 10)
             pdf.set_text_color(100, 100, 100)
-            clean_detail = _pdf_text(str(detail))[:70]
+            clean_detail = _pdf_text(str(detail))
             pdf.set_x(15)
-            pdf.cell(0, 4, f"Result: {clean_detail}", 0, 1)
+            pdf.multi_cell(0, 5, f"Result: {clean_detail}")
             
+            # Fix (if failed)
             if not ok:
                 pdf.set_x(15)
-                pdf.set_font('Helvetica', 'I', 8)
+                pdf.set_font('Helvetica', 'I', 10)
                 pdf.set_text_color(239, 68, 68)
-                clean_fix = _pdf_text(str(fix))[:80]
-                pdf.cell(0, 4, f"Fix: {clean_fix}", 0, 1)
+                clean_fix = _pdf_text(str(fix))
+                pdf.multi_cell(0, 5, f"Recommendation: {clean_fix}")
             
-            pdf.ln(1)
+            pdf.ln(4)
         
-        # 4. CTA Box - Bottom (Matching Header Color)
-        pdf.ln(5)
+        # 5. CTA Box - Push to bottom before footer
+        pdf.ln(10)
+        cta_y = pdf.get_y()
+        
+        # Check if we need a new page for CTA
+        if cta_y > 240:
+            pdf.add_page()
+            cta_y = 15
+        
         pdf.set_fill_color(34, 211, 238)
-        pdf.rect(15, pdf.get_y(), 180, 18, 'F')
+        pdf.rect(15, cta_y, 180, 22, 'F')
         
-        pdf.set_font('Helvetica', 'B', 10)
+        pdf.set_font('Helvetica', 'B', 12)
         pdf.set_text_color(0, 0, 0)
         pdf.set_x(15)
-        pdf.cell(0, 6, "Need help fixing these issues?", 0, 1, 'C')
+        pdf.cell(0, 8, "Need help fixing these issues?", 0, 1, 'C')
         
-        pdf.set_font('Helvetica', '', 9)
+        pdf.set_font('Helvetica', '', 10)
         pdf.set_text_color(0, 0, 0)
         pdf.set_x(15)
-        pdf.cell(0, 6, "hello@nikhilbuilds.com", 0, 1, 'C')
+        pdf.cell(0, 8, "hello@nikhilbuilds.com", 0, 1, 'C')
 
         pdf_bytes = pdf.output()
         safe_filename = u.replace("https://", "").replace("http://", "").replace("/", "_").replace(":", "")[:30]
