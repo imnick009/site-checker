@@ -85,10 +85,9 @@ footer a:hover{color:var(--accent2);}
 <div class="feature"><div class="feature-icon"></div><div class="feature-title">SEO Audit</div><div class="feature-desc">Title, meta tags, headings check</div></div>
 </div>
 <footer>
-<span>Built by <strong>Nikhil</strong></span>
-<a href="https://nikhilbuilds.com" target="_blank">NikhilBuilds.Com</a>
-<a href="https://github.com/imnick009" target="_blank">GitHub</a>
-<a href="#" onclick="copyEmail(event)">hello&#64;nikhilbuilds.com</a>
+<a href="https://nikhilbuilds.com" target="_blank">🌐 NikhilBuilds.Com</a>
+<a href="https://github.com/imnick009" target="_blank">🐙 GitHub</a>
+<a href="#" onclick="copyEmail(event)">✉️ hello&#64;nikhilbuilds.com</a>
 </footer>
 </div>
 </div>
@@ -235,7 +234,7 @@ def audit(url):
         no_alt = [i for i in imgs if not i.get("alt")]
         checks.append(("Image Alt Tags", len(no_alt) == 0, f"{len(no_alt)}/{len(imgs)} images missing alt", "Add alt text to every image (SEO + accessibility).", "🖼️"))
         kb = round(len(r.content) / 1024)
-        checks.append(("Page Weight", kb <= 1500, f"{kb} KB", "Compress images & remove unused scripts.", "📦"))
+        checks.append(("Page Weight", kb <= 1500, f"{kb} KB", "Compress images & remove unused scripts.", ""))
         return checks, None
     except Exception as e:
         return None, str(e)
@@ -293,7 +292,7 @@ def report_html(u, checks):
         <a href="#" class="cta-btn cta-btn-secondary" onclick="copyEmail(event)">✉️ hello&#64;nikhilbuilds.com</a>
     </div>
     <div class="cta-links">
-        <a href="https://nikhilbuilds.com" target="_blank">NikhilBuilds.Com</a>
+        <a href="https://nikhilbuilds.com" target="_blank"> NikhilBuilds.Com</a>
         <a href="https://github.com/imnick009" target="_blank">🐙 GitHub</a>
     </div>
 </div>
@@ -376,7 +375,7 @@ def download_pdf():
             self.set_font('Helvetica', 'B', 13)
             self.set_text_color(0, 0, 0)
             self.set_x(0)
-            self.cell(210, 8, "NikhilBuilds.Com", 0, 1, 'C')
+            self.cell(210, 8, "nikhilbuilds.com", 0, 1, 'C')
 
     try:
         pdf = AuditPDF()
