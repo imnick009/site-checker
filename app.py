@@ -10,6 +10,14 @@ from datetime import datetime
 
 app = Flask(__name__)
 
+# Prevent caching
+@app.after_request
+def add_header(response):
+    response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '0'
+    return response
+
 UA = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
 
 LANDING = """<!DOCTYPE html>
@@ -43,6 +51,7 @@ button{padding:16px 28px;border-radius:12px;border:none;background:var(--gradien
 button::before{content:'';position:absolute;top:50%;left:50%;width:0;height:0;border-radius:50%;background:rgba(255,255,255,.3);transform:translate(-50%,-50%);transition:width .6s,height .6s;}
 button:hover::before{width:300px;height:300px;}
 button:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(74,222,128,.3);}
+button:disabled{opacity:.6;cursor:not-allowed;}
 .features{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:28px;}
 .feature{background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:12px;padding:16px;transition:all .3s;}
 .feature:hover{background:rgba(255,255,255,.06);transform:translateY(-2px);}
@@ -54,16 +63,18 @@ footer a{color:var(--accent);text-decoration:none;transition:color .2s;cursor:po
 footer a:hover{color:var(--accent2);}
 .toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--gradient);color:#0a0e27;padding:14px 28px;border-radius:12px;font-weight:700;font-size:.95rem;box-shadow:0 8px 32px rgba(74,222,128,.4);transition:transform .3s ease;z-index:9999;}
 .toast.show{transform:translateX(-50%) translateY(0);}
+.hidden{display:none !important;}
+@keyframes spin{to{transform:rotate(360deg)}}
 @media(max-width:640px){.box{padding:32px 24px}h1{font-size:2rem}form{flex-direction:column}button{width:100%}}
 </style>
 </head>
 <body>
-<div class="container">
+<div class="container" id="landingPage">
 <div class="box">
 <div class="logo">🩺 Free Tool</div>
 <h1>Website Health <span>Check</span></h1>
 <p class="sub">Get an instant professional audit of any website — speed, mobile, SEO & security issues revealed in seconds.</p>
-<form action="/api/check" method="POST" id="checkForm">
+<form id="checkForm">
 <input type="text" name="url" placeholder="https://yourbusiness.com" required id="urlInput">
 <button type="submit" id="submitBtn">Scan Website</button>
 </form>
@@ -81,24 +92,73 @@ footer a:hover{color:var(--accent2);}
 </footer>
 </div>
 </div>
+
+<div id="resultContainer" class="hidden"></div>
+
 <div class="toast" id="toast">✓ Email copied to clipboard!</div>
 <script>
 function copyEmail(e) {
-e.preventDefault();
-const email = 'hello@nikhilbuilds.com';
-navigator.clipboard.writeText(email).then(() => {
-const toast = document.getElementById('toast');
-toast.classList.add('show');
-setTimeout(() => toast.classList.remove('show'), 2500);
-});
+    if(e) e.preventDefault();
+    const email = 'hello@nikhilbuilds.com';
+    navigator.clipboard.writeText(email).then(() => {
+        const toast = document.getElementById('toast');
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 2500);
+    });
 }
-document.getElementById('checkForm').addEventListener('submit', function(e) {
-const btn = document.getElementById('submitBtn');
-const input = document.getElementById('urlInput');
-if (!input.value.trim()) { e.preventDefault(); return; }
-btn.innerHTML = '<span style="display:inline-block;animation:spin 1s linear infinite;">⏳</span> Scanning...';
-btn.disabled = true;
-btn.style.opacity = '.7';
+
+function goBack() {
+    document.getElementById('landingPage').classList.remove('hidden');
+    document.getElementById('resultContainer').classList.add('hidden');
+    document.getElementById('resultContainer').innerHTML = '';
+    const btn = document.getElementById('submitBtn');
+    btn.innerHTML = 'Scan Website';
+    btn.disabled = false;
+    document.getElementById('urlInput').value = '';
+    window.history.pushState({}, '', '/');
+}
+
+document.getElementById('checkForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const btn = document.getElementById('submitBtn');
+    const input = document.getElementById('urlInput');
+    const url = input.value.trim();
+
+    if (!url) return;
+
+    btn.innerHTML = '<span style="display:inline-block;animation:spin 1s linear infinite;">⏳</span> Scanning...';
+    btn.disabled = true;
+
+    try {
+        const response = await fetch('/api/check', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: 'url=' + encodeURIComponent(url)
+        });
+        
+        const html = await response.text();
+        
+        document.getElementById('landingPage').classList.add('hidden');
+        document.getElementById('resultContainer').innerHTML = html;
+        document.getElementById('resultContainer').classList.remove('hidden');
+        
+        window.history.pushState({}, '', '/result');
+        
+    } catch (error) {
+        alert('Something went wrong. Please try again.');
+        btn.innerHTML = 'Scan Website';
+        btn.disabled = false;
+    }
+});
+
+window.addEventListener('popstate', function() {
+    document.getElementById('landingPage').classList.remove('hidden');
+    document.getElementById('resultContainer').classList.add('hidden');
+    document.getElementById('resultContainer').innerHTML = '';
+    const btn = document.getElementById('submitBtn');
+    btn.innerHTML = 'Scan Website';
+    btn.disabled = false;
+    document.getElementById('urlInput').value = '';
 });
 </script>
 </body>
@@ -112,7 +172,7 @@ body::before{content:'';position:fixed;top:0;left:0;right:0;bottom:0;background:
 .wrap{max-width:800px;margin:0 auto;position:relative;z-index:1;animation:fadeIn .5s ease;}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
 @keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
-.back{display:inline-flex;align-items:center;gap:6px;color:var(--muted);text-decoration:none;font-size:.9rem;margin-bottom:20px;transition:color .2s;}
+.back{display:inline-flex;align-items:center;gap:6px;color:var(--muted);text-decoration:none;font-size:.9rem;margin-bottom:20px;transition:color .2s;cursor:pointer;}
 .back:hover{color:var(--accent)}
 h1{font-size:2rem;font-weight:800;margin-bottom:8px;letter-spacing:-.02em;}
 h1 span{background:var(--gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
@@ -163,7 +223,7 @@ def audit(url):
         checks.append(("Page Load Speed", load <= 3, f"{load}s", "Compress images, enable caching, use a CDN.", "⚡"))
         checks.append(("HTTPS / SSL Security", final_url.startswith("https"), "Secure" if final_url.startswith("https") else "NOT secure", "Install a free SSL certificate (Let's Encrypt / Cloudflare).", "🔒"))
         vp = soup.find("meta", attrs={"name": "viewport"}) is not None
-        checks.append(("Mobile Friendly", vp, "Viewport set" if vp else "No viewport tag", "Add mobile viewport meta tag + responsive theme.", ""))
+        checks.append(("Mobile Friendly", vp, "Viewport set" if vp else "No viewport tag", "Add mobile viewport meta tag + responsive theme.", "📱"))
         title = soup.title.string.strip() if soup.title and soup.title.string else ""
         checks.append(("Page Title (SEO)", len(title) >= 10, title or "Missing", "Write a 30-60 character title with your main keyword.", "🏷️"))
         m = soup.find("meta", attrs={"name": "description"})
@@ -173,7 +233,7 @@ def audit(url):
         checks.append(("H1 Heading", h1 is not None, h1.get_text(strip=True)[:60] if h1 else "Missing", "Use exactly one H1 that states what the page is about.", "📋"))
         imgs = soup.find_all("img")
         no_alt = [i for i in imgs if not i.get("alt")]
-        checks.append(("Image Alt Tags", len(no_alt) == 0, f"{len(no_alt)}/{len(imgs)} images missing alt", "Add alt text to every image (SEO + accessibility).", "️"))
+        checks.append(("Image Alt Tags", len(no_alt) == 0, f"{len(no_alt)}/{len(imgs)} images missing alt", "Add alt text to every image (SEO + accessibility).", "🖼️"))
         kb = round(len(r.content) / 1024)
         checks.append(("Page Weight", kb <= 1500, f"{kb} KB", "Compress images & remove unused scripts.", "📦"))
         return checks, None
@@ -213,29 +273,23 @@ def report_html(u, checks):
 </div>
 </div>"""
     safe_u = urllib.parse.quote(u)
-    return f"""<!DOCTYPE html>
-<html><head><meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="SiteCheck is a free automated website health auditor.">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<title>SiteCheck Report</title><style>{CSS}</style></head>
-<body><div class="wrap">
-<a class="back" href="/">← Scan another website</a>
-<h1>🩺 Site<span>Check</span> Report</h1>
+    return f"""<div class="wrap">
+<a class="back" onclick="goBack()">← Scan another website</a>
+<h1> Site<span>Check</span> Report</h1>
 <div class="url-display">Scanned: {u}</div>
 <div class="score-card">
 <div class="score-number">{score}</div>
 <div class="score-label">Health Score</div>
 <div class="progress-bar"><div class="progress-fill" style="width:{score}%"></div></div>
 </div>
-<div class="section-title">📊 Detailed Analysis</div>
+<div class="section-title"> Detailed Analysis</div>
 {rows}
 <div class="cta">
 <h2>Want these issues fixed for you?</h2>
 <p>I fix exactly these problems for businesses in 2-4 days, fixed price. No surprises.</p>
 <div class="cta-actions">
     <div class="cta-buttons">
-        <a href="/download-pdf?site={safe_u}" target="_blank" class="cta-btn cta-btn-primary"> Download PDF Report</a>
+        <a href="/download-pdf?site={safe_u}" target="_blank" class="cta-btn cta-btn-primary">📥 Download PDF Report</a>
         <a href="#" class="cta-btn cta-btn-secondary" onclick="copyEmail(event)">✉️ hello@nikhilbuilds.com</a>
     </div>
     <div class="cta-links">
@@ -243,30 +297,12 @@ def report_html(u, checks):
         <a href="https://github.com/imnick009" target="_blank">🐙 GitHub</a>
     </div>
 </div>
-</div>
-<div class="toast" id="toast">✓ Email copied to clipboard!</div>
-<script>
-function copyEmail(e) {{
-e.preventDefault();
-const email = 'hello@nikhilbuilds.com';
-navigator.clipboard.writeText(email).then(() => {{
-const toast = document.getElementById('toast');
-toast.classList.add('show');
-setTimeout(() => toast.classList.remove('show'), 2500);
-}});
-}}
-</script>
-</div></body></html>"""
+</div>"""
 
 def error_html(msg):
-    return f"""<!DOCTYPE html>
-<html><head><meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<style>{CSS}</style></head>
-<body><div class="wrap">
-<a class="back" href="/">← Try again</a>
-<h1> Site<span>Check</span></h1>
+    return f"""<div class="wrap">
+<a class="back" onclick="goBack()">← Try again</a>
+<h1>🩺 Site<span>Check</span></h1>
 <div class="row row-fail">
 <div class="row-header">
 <div class="row-icon">❌</div>
@@ -277,7 +313,7 @@ def error_html(msg):
 </div>
 </div>
 </div>
-</div></body></html>"""
+</div>"""
 
 @app.route("/")
 def home():
@@ -322,14 +358,11 @@ def download_pdf():
             self.cell(0, 8, 'Website Health Audit Report', 0, 1, 'R')
             self.ln(10)
 
-def footer(self):
-    self.set_y(-15)
-    self.set_fill_color(34, 211, 238)
-    self.rect(0, self.get_y(), 210, 15, 'F')
-    self.set_font('Helvetica', 'I', 8)
-    self.set_text_color(255, 255, 255)
-    self.set_xy(15, self.get_y() + 2)
-    self.cell(180, 10, 'hello@nikhilbuilds.com | nikhilbuilds.com', 0, 0, 'C')
+        def footer(self):
+            self.set_y(-10)
+            self.set_font('Helvetica', 'I', 8)
+            self.set_text_color(150, 150, 150)
+            self.cell(0, 10, 'hello@nikhilbuilds.com | nikhilbuilds.com', 0, 0, 'C')
 
     try:
         pdf = AuditPDF()
