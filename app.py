@@ -88,7 +88,7 @@ footer a:hover{color:var(--accent2);}
 <span>Built by <strong>Nikhil</strong></span>
 <a href="https://nikhilbuilds.com" target="_blank">Portfolio</a>
 <a href="https://github.com/imnick009" target="_blank">GitHub</a>
-<a href="#" onclick="copyEmail(event)">hello@nikhilbuilds.com</a>
+<a href="#" onclick="copyEmail(event)">hello&#64;nikhilbuilds.com</a>
 </footer>
 </div>
 </div>
@@ -99,7 +99,7 @@ footer a:hover{color:var(--accent2);}
 <script>
 function copyEmail(e) {
     if(e) e.preventDefault();
-    const email = 'hello@nikhilbuilds.com';
+    const email = 'hello' + '@nikhilbuilds.com';
     navigator.clipboard.writeText(email).then(() => {
         const toast = document.getElementById('toast');
         toast.classList.add('show');
@@ -275,14 +275,14 @@ def report_html(u, checks):
     safe_u = urllib.parse.quote(u)
     return f"""<style>{CSS}</style><div class="wrap">
 <a class="back" onclick="goBack()">← Scan another website</a>
-<h1> Site<span>Check</span> Report</h1>
+<h1>🩺 Site<span>Check</span> Report</h1>
 <div class="url-display">Scanned: {u}</div>
 <div class="score-card">
 <div class="score-number">{score}</div>
 <div class="score-label">Health Score</div>
 <div class="progress-bar"><div class="progress-fill" style="width:{score}%"></div></div>
 </div>
-<div class="section-title"> Detailed Analysis</div>
+<div class="section-title">📊 Detailed Analysis</div>
 {rows}
 <div class="cta">
 <h2>Want these issues fixed for you?</h2>
@@ -290,7 +290,7 @@ def report_html(u, checks):
 <div class="cta-actions">
     <div class="cta-buttons">
         <a href="/download-pdf?site={safe_u}" target="_blank" class="cta-btn cta-btn-primary">📥 Download PDF Report</a>
-        <a href="#" class="cta-btn cta-btn-secondary" onclick="copyEmail(event)">✉️ hello@nikhilbuilds.com</a>
+        <a href="#" class="cta-btn cta-btn-secondary" onclick="copyEmail(event)">✉️ hello&#64;nikhilbuilds.com</a>
     </div>
     <div class="cta-links">
         <a href="https://nikhilbuilds.com" target="_blank">🌐 Portfolio</a>
@@ -300,7 +300,7 @@ def report_html(u, checks):
 </div>"""
 
 def error_html(msg):
-    return f"""<div class="wrap">
+    return f"""<style>{CSS}</style><div class="wrap">
 <a class="back" onclick="goBack()">← Try again</a>
 <h1>🩺 Site<span>Check</span></h1>
 <div class="row row-fail">
@@ -358,6 +358,8 @@ def download_pdf():
             self.cell(0, 8, 'Website Health Audit Report', 0, 1, 'R')
             self.ln(10)
 
+        def footer(self):
+            pass
 
     try:
         pdf = AuditPDF()
@@ -426,24 +428,25 @@ def download_pdf():
             
             pdf.ln(4)
         
-pdf.set_y(245)
-pdf.set_fill_color(34, 211, 238)
-pdf.rect(0, pdf.get_y(), 210, 50, 'F')  # Full width (0 se 210)
-
-pdf.set_font('Helvetica', 'B', 14)
-pdf.set_text_color(0, 0, 0)
-pdf.set_x(0)
-pdf.cell(210, 12, "Need help fixing these issues?", 0, 1, 'C')
-
-pdf.set_font('Helvetica', '', 12)
-pdf.set_text_color(0, 0, 0)
-pdf.set_x(0)
-pdf.cell(210, 10, "Contact me: hello@nikhilbuilds.com", 0, 1, 'C')
-
-pdf.set_font('Helvetica', 'I', 9)
-pdf.set_text_color(50, 50, 50)
-pdf.set_x(0)
-pdf.cell(210, 10, "hello@nikhilbuilds.com | nikhilbuilds.com", 0, 1, 'C')
+        # FIXED INDENTATION: Yeh ab sahi se 'try' block ke andar hai
+        pdf.set_y(245)
+        pdf.set_fill_color(34, 211, 238)
+        pdf.rect(0, pdf.get_y(), 210, 50, 'F')
+        
+        pdf.set_font('Helvetica', 'B', 14)
+        pdf.set_text_color(0, 0, 0)
+        pdf.set_x(0)
+        pdf.cell(210, 12, "Need help fixing these issues?", 0, 1, 'C')
+        
+        pdf.set_font('Helvetica', '', 12)
+        pdf.set_text_color(0, 0, 0)
+        pdf.set_x(0)
+        pdf.cell(210, 10, "Contact me: hello@nikhilbuilds.com", 0, 1, 'C')
+        
+        pdf.set_font('Helvetica', 'I', 9)
+        pdf.set_text_color(50, 50, 50)
+        pdf.set_x(0)
+        pdf.cell(210, 10, "hello@nikhilbuilds.com | nikhilbuilds.com", 0, 1, 'C')
 
         pdf_bytes = pdf.output()
         safe_filename = u.replace("https://", "").replace("http://", "").replace("/", "_").replace(":", "")[:30]
