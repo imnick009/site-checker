@@ -661,7 +661,7 @@ def report_html(u, checks):
 <p>I fix exactly these problems for businesses in 2-4 days, fixed price. No surprises.</p>
 <div class="cta-links">
 <a href="/download-pdf?site={safe_u}" target="_blank" class="email-btn" style="background: linear-gradient(135deg, #60a5fa 0%, #4ade80 100%);">📥 Download PDF Report</a>
-<a href="#" class="email-btn" onclick="copyEmail(event)">hello@nikhilbuilds.com/a>
+<a href="#" class="email-btn" onclick="copyEmail(event)">hello@nikhilbuilds.com</a>
 <a href="https://imnick009.github.io" target="_blank">🌐 Portfolio</a>
 <a href="https://github.com/imnick009" target="_blank">🐙 GitHub</a>
 </div>
