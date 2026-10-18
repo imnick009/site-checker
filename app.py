@@ -273,7 +273,7 @@ button{width:100%}
 <span>Built by <strong>Nikhil</strong></span>
 <a href="https://imnick009.github.io" target="_blank">Portfolio</a>
 <a href="https://github.com/imnick009" target="_blank">GitHub</a>
-<a href="#" onclick="copyEmail(event)">osmnick999@gmail.com</a>
+<a href="#" onclick="copyEmail(event)">hello@nikhilbuilds.com</a>
 </footer>
 </div>
 </div>
@@ -281,7 +281,7 @@ button{width:100%}
 <script>
 function copyEmail(e) {
 e.preventDefault();
-const email = 'osmnick999@gmail.com';
+const email = 'hello@nikhilbuilds.com';
 navigator.clipboard.writeText(email).then(() => {
 const toast = document.getElementById('toast');
 toast.classList.add('show');
@@ -661,7 +661,7 @@ def report_html(u, checks):
 <p>I fix exactly these problems for businesses in 2-4 days, fixed price. No surprises.</p>
 <div class="cta-links">
 <a href="/download-pdf?site={safe_u}" target="_blank" class="email-btn" style="background: linear-gradient(135deg, #60a5fa 0%, #4ade80 100%);">📥 Download PDF Report</a>
-<a href="#" class="email-btn" onclick="copyEmail(event)">osmnick999@gmail.com</a>
+<a href="#" class="email-btn" onclick="copyEmail(event)">hello@nikhilbuilds.com/a>
 <a href="https://imnick009.github.io" target="_blank">🌐 Portfolio</a>
 <a href="https://github.com/imnick009" target="_blank">🐙 GitHub</a>
 </div>
@@ -670,7 +670,7 @@ def report_html(u, checks):
 <script>
 function copyEmail(e) {{
 e.preventDefault();
-const email = 'osmnick999@gmail.com';
+const email = 'hello@nikhilbuilds.com';
 navigator.clipboard.writeText(email).then(() => {{
 const toast = document.getElementById('toast');
 toast.classList.add('show');
@@ -818,7 +818,7 @@ def download_pdf():
         pdf.set_x(left)
         pdf.set_font("Helvetica", "B", 11)
         pdf.set_text_color(20, 120, 80)
-        pdf.cell(full, 7, "Email: osmnick999@gmail.com")
+        pdf.cell(full, 7, "Email: hello@nikhilbuilds.com")
         pdf.ln(7)
 
         pdf_bytes = pdf.output()
